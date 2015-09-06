@@ -54,3 +54,5 @@ done <<- EOF
     2   in  # ERR
 EOF
 
+ip link set can0 up type can bitrate 125000 loopback off
+./set_tja1055Mode.py 1 1 1
