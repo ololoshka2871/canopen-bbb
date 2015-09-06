@@ -1,6 +1,6 @@
 
 import canopen
-from lss import network, vendor_id, product_id, revision, serial_number
+from common import *
 
 speed_map = {
     10000 : 8,
@@ -14,14 +14,12 @@ speed_map = {
 }
 
 def set_bitrate(speed):
-    nw = network()
+    nw = create_network()
+    
     # put device in config mode
-    assert nw.lss.send_switch_state_selective(
-            vendor_id, product_id, revision, serial_number)
-
+    bootloader_lss_configuration_state(nw)
+    
     grade = speed_map[speed]
-
-    print('New speed grade {}'.format(grade))
 
     # set new bit timing
     nw.lss.configure_bit_timing(grade)
@@ -33,5 +31,5 @@ def set_bitrate(speed):
     nw.lss.activate_bit_timing(100)
 
     # put device to waiting mode back
-    nw.lss.send_switch_state_global(nw.lss.WAITING_STATE)
+    lss_waiting_state(nw)
 

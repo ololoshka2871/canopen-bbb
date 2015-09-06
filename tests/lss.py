@@ -2,18 +2,11 @@
 import pytest
 import canopen
 from canopen_lss_fastscan import fast_scan
-
-# bootloader LSS id
-vendor_id = 0x004f038C
-product_id = 0xCB01
-revision = 0
-serial_number = 1
+from common import *
 
 @pytest.fixture
 def network():
-    network = canopen.Network()
-    network.connect(channel='can0', bustype='socketcan')
-    return network
+    return create_network()
 
 
 # not working in library
@@ -27,9 +20,8 @@ def test_set_config_mode(network):
 
 
 def test_set_config_mode_by_id(network):
-    assert network.lss.send_switch_state_selective(
-            vendor_id, product_id, revision, serial_number)
-    network.lss.send_switch_state_global(network.lss.WAITING_STATE)
+    bootloader_lss_configuration_state(network)
+    lss_waiting_state(network)
     
 
 def test_configure_bit_timing(network):
@@ -43,9 +35,8 @@ def test_configure_bit_timing(network):
         (7, True),
         (8, True)
     )
-    
-    assert network.lss.send_switch_state_selective(
-            vendor_id, product_id, revision, serial_number)
+
+    bootloader_lss_configuration_state(network)    
 
     for speed_grade, res in test_matrix:
         try:
@@ -57,27 +48,25 @@ def test_configure_bit_timing(network):
         if not passed:
             network.lss.send_switch_state_global(network.lss.WAITING_STATE)
             raise Exception('Exception at speed {}'.format(speed_grade))
-    
-    network.lss.send_switch_state_global(network.lss.WAITING_STATE)
+
+    lss_waiting_state(network)    
 
 
 def test_inquire_lss_address(network):
-    assert network.lss.send_switch_state_selective(
-             vendor_id, product_id, revision, serial_number)
+    bootloader_lss_configuration_state(network)
     
     assert vendor_id == network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_VENDOR_ID)
     assert product_id == network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_PRODUCT_CODE)
     assert revision == network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_REVISION_NUMBER)
     assert serial_number == network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_SERIAL_NUMBER)
 
-    network.lss.send_switch_state_global(network.lss.WAITING_STATE)
+    lss_waiting_state(network)
 
 def test_set_node_id(network):
-    assert network.lss.send_switch_state_selective(
-            vendor_id, product_id, revision, serial_number)
+    bootloader_lss_configuration_state(network)  
 
     for node_id in (1, 15, 127, 255):
         network.lss.configure_node_id(node_id)
         assert node_id == network.lss.inquire_node_id()
-    network.lss.send_switch_state_global(network.lss.WAITING_STATE)
 
+    lss_waiting_state(network)
