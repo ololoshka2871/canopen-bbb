@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 import canopen
 from canopen.lss import ListMessageNeedResponse, LssError
 try:
@@ -58,7 +59,11 @@ if __name__ == '__main__':
     
     nw = canopen.Network()
     nw.connect(channel=args.interface, bustype='socketcan')
-    res = fast_scan(nw.lss, False)
+    if int(sys.version[0]) == 2:
+        res = fast_scan(nw.lss, False)
+    else:
+        res = nw.lss.fast_scan()
+        nw.lss.send_switch_state_global(nw.lss.WAITING_STATE)
     if res[0]:
         LSS_id = res[1]
         print('Found unconfigured device:')

@@ -8,7 +8,7 @@ revision = 0
 serial_number = 1
 
 
-def create_network(device='can0'):
+def create_network(device='can1'):
     network = canopen.Network()
     network.connect(channel=device, bustype='socketcan')
     return network
