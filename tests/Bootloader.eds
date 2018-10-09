@@ -294,7 +294,7 @@ ParameterName=Program number 1
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x000F
-AccessType=rw
+AccessType=ro
 DefaultValue=
 PDOMapping=0
 
@@ -328,7 +328,8 @@ PDOMapping=0
 
 [1F80]
 ParameterName=NMT startup
-ObjectType=7
+ObjectType=0x7
+;StorageLocation=RAM
 DataType=0x0007
 AccessType=rw
 PDOMapping=0

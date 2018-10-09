@@ -1,19 +1,6 @@
 
-import pytest
-import time
 import canopen
 from common import *
-
-@pytest.fixture
-def network():
-    return create_network()
-
-
-def set_bootloader_node_id(network, node_id):
-    bootloader_lss_configuration_state(network)
-    network.lss.configure_node_id(node_id)
-    network.lss.store_configuration()
-    lss_waiting_state(network)
 
 
 class TestNMT(object):

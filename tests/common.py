@@ -22,3 +22,9 @@ def bootloader_lss_configuration_state(network):
 def lss_waiting_state(network):
     network.lss.send_switch_state_global(network.lss.WAITING_STATE)
 
+
+def set_bootloader_node_id(network, node_id):
+    bootloader_lss_configuration_state(network)
+    network.lss.configure_node_id(node_id)
+    network.lss.store_configuration()
+    lss_waiting_state(network)
