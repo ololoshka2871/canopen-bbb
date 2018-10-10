@@ -22,6 +22,6 @@ class TestSDO(object):
             print(self.node.sdo[0x1029][k].raw)
 
     def test_sdo1f50sub1(self):
-        pass
+        print('\nObject size: {}'.format(len(self.node.sdo[0x1f50][1].raw)))
 
 
