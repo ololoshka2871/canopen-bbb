@@ -129,7 +129,7 @@ DefaultValue=1
 PDOMapping=0
 
 [OptionalObjects]
-SupportedObjects=11
+SupportedObjects=12
 1=0x1002
 2=0x1003
 3=0x1008
@@ -140,7 +140,8 @@ SupportedObjects=11
 8=0x1200
 9=0x1F50
 10=0x1F51
-11=0x1F80
+11=0x1F56
+12=0x1F80
 
 [1002]
 ParameterName=Manufacturer status
@@ -294,7 +295,7 @@ ParameterName=Program number 1
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x000F
-AccessType=ro
+AccessType=wo
 DefaultValue=
 PDOMapping=0
 
@@ -321,8 +322,30 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
 AccessType=rw
-HighLimit=0x03
-LowLimit=0x00
+DefaultValue=
+PDOMapping=0
+
+[1F56]
+ParameterName=Identifies the application
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x2
+
+[1F56sub0]
+ParameterName=Number of entries
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=1
+PDOMapping=0
+
+[1F56sub1]
+ParameterName=Identifies the application (CRC32) 1
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
 DefaultValue=
 PDOMapping=0
 
