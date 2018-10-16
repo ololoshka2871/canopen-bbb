@@ -44,7 +44,8 @@ class TestSDO(object):
         cls.node_id = 16
 
         # lss prepare node
-        set_bootloader_node_id(cls.network, cls.node_id)
+        lss_waiting_state(cls.network)
+        set_node_id(cls.network, cls.node_id)
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
 
@@ -52,6 +53,6 @@ class TestSDO(object):
         entry = ODEntry.parce(odEntry)
         if isinstance(self.node.sdo[entry.index], canopen.sdo.base.Array):
             for subindex in self.node.sdo[entry.index].keys():
-                assert  self.node.sdo[entry.index][subindex].raw is not None
+                assert self.node.sdo[entry.index][subindex].raw is not None
         else:
             assert entry.getvalue(self.node.sdo) is not None

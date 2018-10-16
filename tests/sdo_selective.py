@@ -2,8 +2,7 @@ import canopen
 from common import *
 import can
 import pytest
-import random
-import zlib
+import struct
 
 # Установлено, что на скорости 10000 буфер передатчика не более 182 байт
 
@@ -31,7 +30,8 @@ class TestSDO(object):
         cls.node_id = 16
 
         # lss prepare node
-        set_bootloader_node_id(cls.network, cls.node_id)
+        lss_waiting_state(cls.network)
+        set_node_id(cls.network, cls.node_id)
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
         cls.firmware = open('app.bin', 'rb').read()
@@ -52,11 +52,8 @@ class TestSDO(object):
             self.node.sdo[0x1029][1].raw = i
             assert self.node.sdo[0x1029][1].raw == i
 
-    def _test_write_multiply7(self):
-        for v in range(30):
-            data = bytearray([x & 0xff for x in range(7*v)])
-            with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
-                f.write(data)
+    def test_STATUS(self):
+        assert self.node.sdo[0x2100].raw.decode("utf-8").rstrip('\0') in ('READY', 'NO APP', 'APP ERR')
 
     @pytest.mark.xfail(raises=can.CanError)
     def _test_incorrect_write_sdo1f50sub1(self):
@@ -69,11 +66,16 @@ class TestSDO(object):
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=True) as f:
             f.write(data)
 
-    def test_write4096_sdo1f50sub1(self):
+    def _test_write4096_sdo1f50sub1(self):
         data = self.firmware
-
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
 
+    def _test_app_crc_check(self):
+        crc = struct.unpack('<I', self.firmware[6*4:7*4])[0]
+        r_crc = self.node.sdo[0x1f56][1].raw
+        assert crc == r_crc
+
+    @pytest.mark.xfail(raises=canopen.sdo.exceptions.SdoAbortedError)
     def _test_sdo1f50sub1(self):
-        print('\nObject size: {}'.format(len(self.node.sdo[0x1f50][1].raw)))
+        len(self.node.sdo[0x1f50][1].raw)
