@@ -50,6 +50,7 @@ def fast_scan(lssMaster, put_config_state=True):
         lssMaster.send_switch_state_global(lssMaster.WAITING_STATE)
     return res
 
+
 if __name__ == '__main__':
     import argparse
 
@@ -73,6 +74,3 @@ Revision Number = {}
 Serial Number = {}'''.format(*LSS_id))
     else:
         print('Fast scan failled.')
-
-
-    

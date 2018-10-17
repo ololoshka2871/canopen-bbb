@@ -129,19 +129,18 @@ DefaultValue=1
 PDOMapping=0
 
 [OptionalObjects]
-SupportedObjects=12
+SupportedObjects=11
 1=0x1002
 2=0x1003
 3=0x1008
 4=0x1009
 5=0x100A
-6=0x1017
-7=0x1029
-8=0x1200
-9=0x1F50
-10=0x1F51
-11=0x1F56
-12=0x1F80
+6=0x1029
+7=0x1200
+8=0x1F50
+9=0x1F51
+10=0x1F56
+11=0x1F57
 
 [1002]
 ParameterName=Manufacturer status
@@ -203,17 +202,6 @@ ObjectType=0x7
 DataType=0x0009
 AccessType=const
 DefaultValue=1.00
-PDOMapping=0
-
-[1017]
-ParameterName=Producer heartbeat time
-ObjectType=0x7
-;StorageLocation=RAM
-DataType=0x0006
-AccessType=rw
-HighLimit=0xffff
-LowLimit=0x0000
-DefaultValue=0x0000
 PDOMapping=0
 
 [1029]
@@ -321,7 +309,7 @@ ParameterName=Program control 1
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
-AccessType=rw
+AccessType=wo
 DefaultValue=
 PDOMapping=0
 
@@ -349,25 +337,29 @@ AccessType=ro
 DefaultValue=
 PDOMapping=0
 
-[1F80]
-ParameterName=NMT startup
+[1F57]
+ParameterName=Flash status identification
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x2
+
+[1F57sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=1
+PDOMapping=0
+
+[1F57sub1]
+ParameterName=Program Number 1
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0007
-AccessType=rw
+AccessType=ro
+DefaultValue=0
 PDOMapping=0
-DefaultValue=0x00000000
 
 [ManufacturerObjects]
-SupportedObjects=1
-1=0x2100
-
-[2100]
-ParameterName=Error status bits
-ObjectType=0x7
-;StorageLocation=RAM
-DataType=0x000A
-AccessType=ro
-DefaultValue=00000000000000000000
-PDOMapping=1
-
+SupportedObjects=0

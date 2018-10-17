@@ -1,5 +1,6 @@
-import canopen
 from common import *
+import canopen
+
 
 class ODEntry:
     def __init__(self, index, subindex=None):
@@ -37,7 +38,7 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize('odEntry', entries)
 
 
-class TestSDO(object):
+class TestSDOReadAll(object):
     @classmethod
     def setup_class(cls):
         cls.network = create_network()
@@ -45,7 +46,7 @@ class TestSDO(object):
 
         # lss prepare node
         lss_waiting_state(cls.network)
-        set_node_id(cls.network, cls.node_id)
+        lss_set_node_id(cls.network, cls.node_id)
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
 
@@ -53,6 +54,14 @@ class TestSDO(object):
         entry = ODEntry.parce(odEntry)
         if isinstance(self.node.sdo[entry.index], canopen.sdo.base.Array):
             for subindex in self.node.sdo[entry.index].keys():
-                assert self.node.sdo[entry.index][subindex].raw is not None
+                try:
+                    v = self.node.sdo[entry.index][subindex].raw
+                except canopen.sdo.exceptions.SdoAbortedError as f:
+                    if f.code != 0x06010001:
+                        raise f
         else:
-            assert entry.getvalue(self.node.sdo) is not None
+            try:
+                v = entry.getvalue(self.node.sdo)
+            except canopen.sdo.exceptions.SdoAbortedError as f:
+                if f.code != 0x06010001:
+                    raise f
