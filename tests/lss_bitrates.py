@@ -4,18 +4,6 @@ import canopen
 from common import *
 
 
-speed_map = {
-    10000: 8,
-    20000: 7,
-    50000: 6,
-    125000: 4,
-    250000: 3,
-    500000: 2,
-    800000: 1,
-    1000000: 0,
-}
-
-
 class TestLSSBitrates(object):
     @classmethod
     def setup_class(cls):

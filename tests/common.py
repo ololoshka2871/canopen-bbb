@@ -14,6 +14,18 @@ boot_serial_number = 1
 default_interface = 'can1'
 
 
+speed_map = {
+    10000: 8,
+    20000: 7,
+    50000: 6,
+    125000: 4,
+    250000: 3,
+    500000: 2,
+    800000: 1,
+    1000000: 0,
+}
+
+
 class FlashStatus:
     NO_OPERATION = 0
     OK = 1
