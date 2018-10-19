@@ -1,5 +1,6 @@
 from common import *
 import canopen
+import time
 
 
 class ODEntry:
@@ -43,12 +44,17 @@ class TestSDOReadAll(object):
     def setup_class(cls):
         cls.network = create_network()
         cls.node_id = 16
+        reset_network(cls.network)
 
         # lss prepare node
         lss_waiting_state(cls.network)
         lss_set_node_id(cls.network, cls.node_id)
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
+
+    @classmethod
+    def teardown_class(cls):
+        cls.network.disconnect()
 
     def test_read_SDO_entries(self, odEntry):
         entry = ODEntry.parce(odEntry)

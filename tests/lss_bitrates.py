@@ -2,20 +2,25 @@
 import pytest
 import canopen
 from common import *
+import time
 
 
 class TestLSSBitrates(object):
     @classmethod
     def setup_class(cls):
         set_interface_bitrate(10000)
-        cls.network = None
+        nw = create_network()
+        nw.nmt.state = 'RESET'
+        nw.disconnect()
+        time.sleep(0.1)
 
-    def _setDeviceBitrate(self, bitrate):
+    @staticmethod
+    def _setDeviceBitrate(network, bitrate):
         grade = speed_map[bitrate]
         try:
-            self.network.lss.configure_bit_timing(grade)
-            self.network.lss.store_configuration()
-            self.network.lss.activate_bit_timing(100)
+            network.lss.configure_bit_timing(grade)
+            network.lss.store_configuration()
+            network.lss.activate_bit_timing(100)
             return True
         except canopen.lss.LssError:
             return False
@@ -30,12 +35,12 @@ class TestLSSBitrates(object):
          (20000, True),
          (10000, True)])
     def testBitrate(self, bitrate, result):
-        self.network = create_network()
-        lss_waiting_state(self.network)
+        network = create_network()
+        lss_waiting_state(network)
 
-        lss_configuration_state(self.network)
-        assert self._setDeviceBitrate(bitrate) == result
-        self.network.disconnect()
+        lss_configuration_state(network)
+        assert self._setDeviceBitrate(network, bitrate) == result
+        network.disconnect()
 
         if result:
             set_interface_bitrate(bitrate)

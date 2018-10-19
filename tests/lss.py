@@ -3,29 +3,35 @@ import pytest
 import canopen
 from canopen_lss_fastscan import fast_scan
 from common import *
-
-@pytest.fixture
-def network():
-    return create_network()
+import time
 
 
-# not working in library
-#def test_identify_remote_slave(network):
-#    assert network.lss.send_identify_remote_slave(vendor_id, product_id, 
-#        0, 1, 1, 2)
+class TestLSS(object):
+    @classmethod
+    def setup_class(cls):
+        set_interface_bitrate(10000)
+        cls.network = create_network()
+        cls.network.nmt.state = 'RESET'
+        time.sleep(0.1)
 
-def test_set_config_mode(network):
-    network.lss.send_switch_state_global(network.lss.CONFIGURATION_STATE)
-    network.lss.send_switch_state_global(network.lss.WAITING_STATE)
+    @classmethod
+    def teardown_class(cls):
+        cls.network.disconnect()
 
+    # not working in library
+    #def test_identify_remote_slave(network):
+    #    assert network.lss.send_identify_remote_slave(vendor_id, product_id,
+    #        0, 1, 1, 2)
 
-def test_set_config_mode_by_id(network):
-    lss_configuration_state(network)
-    lss_waiting_state(network)
-    
+    def test_set_config_mode(self):
+        self.network.lss.send_switch_state_global(self.network.lss.CONFIGURATION_STATE)
+        self.network.lss.send_switch_state_global(self.network.lss.WAITING_STATE)
 
-def test_configure_bit_timing(network):
-    test_matrix = (
+    def test_set_config_mode_by_id(self):
+        lss_configuration_state(self.network)
+        lss_waiting_state(self.network)
+
+    @pytest.mark.parametrize('speed_grade,result', [
         (0, False),
         (1, False),
         (2, False),
@@ -34,40 +40,36 @@ def test_configure_bit_timing(network):
         (6, True),
         (7, True),
         (8, True)
-    )
+    ])
+    def test_configure_bit_timing(self, speed_grade, result):
+        lss_configuration_state(self.network)
 
-    lss_configuration_state(network)
+        if result:
+            try:
+                self.network.lss.configure_bit_timing(speed_grade)
+            except canopen.lss.LssError as e:
+                self.network.lss.send_switch_state_global(self.network.lss.WAITING_STATE)
+                raise e
+        else:
+            with pytest.raises(canopen.lss.LssError) as e_info:
+                self.network.lss.configure_bit_timing(speed_grade)
+            assert str(e_info.value) == 'LSS Error: 1'
 
-    for speed_grade, res in test_matrix:
-        try:
-            network.lss.configure_bit_timing(speed_grade)
-            passed = res == True
-        except canopen.lss.LssError as e:
-            passed = str(e) == 'LSS Error: 1' and res == False
+    def test_inquire_lss_address(self):
+        lss_configuration_state(self.network)
 
-        if not passed:
-            network.lss.send_switch_state_global(network.lss.WAITING_STATE)
-            raise Exception('Exception at speed {}'.format(speed_grade))
+        assert boot_vendor_id == self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_VENDOR_ID)
+        assert 0 != self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_PRODUCT_CODE)
+        assert 0 < self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_REVISION_NUMBER)
+        assert self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_SERIAL_NUMBER) is not None
 
-    lss_waiting_state(network)    
+        lss_waiting_state(self.network)
 
+    def test_set_node_id(self):
+        lss_configuration_state(self.network)
 
-def test_inquire_lss_address(network):
-    lss_configuration_state(network)
-    
-    assert boot_vendor_id == network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_VENDOR_ID)
-    assert 0 != network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_PRODUCT_CODE)
-    assert 0 < network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_REVISION_NUMBER)
-    assert network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_SERIAL_NUMBER) is not None
+        for node_id in (1, 15, 127, 255):
+            self.network.lss.configure_node_id(node_id)
+            assert node_id == self.network.lss.inquire_node_id()
 
-    lss_waiting_state(network)
-
-
-def test_set_node_id(network):
-    lss_configuration_state(network)
-
-    for node_id in (1, 15, 127, 255):
-        network.lss.configure_node_id(node_id)
-        assert node_id == network.lss.inquire_node_id()
-
-    lss_waiting_state(network)
+        lss_waiting_state(self.network)

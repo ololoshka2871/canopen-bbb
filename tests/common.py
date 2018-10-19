@@ -57,6 +57,18 @@ def lss_waiting_state(network):
     network.lss.send_switch_state_global(network.lss.WAITING_STATE)
 
 
+def reset_network(network):
+    network.nmt.state = 'RESET'
+    time.sleep(0.1)
+
+
+def lss_configure_bit_timing(network, speed):
+    lss_configuration_state(network)
+    network.lss.configure_bit_timing(speed_map[speed])
+    network.lss.store_configuration()
+    lss_waiting_state(network)
+
+
 def lss_set_node_id(network, node_id):
     lss_configuration_state(network)
     network.lss.configure_node_id(node_id)

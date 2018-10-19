@@ -1,4 +1,3 @@
-
 from common import *
 import time
 import pytest
@@ -32,13 +31,15 @@ class TestNMT(object):
             return False
 
     def _reset_delay(self):
-        time.sleep(0.01)
+        time.sleep(0.1)
 
     def test_reset_com(self):
+        lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET COMMUNICATION'
         self.node.nmt.wait_for_bootup(1)
 
     def test_reset(self):
+        lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET'
         self._reset_delay()
         lss_set_node_id(self.network, self.node_id)
@@ -78,16 +79,43 @@ class TestNMT(object):
         lss_waiting_state(self.network)
         self.network.nmt.state = 'PRE-OPERATIONAL'
 
+    @pytest.mark.parametrize("test_speed", [125000, 50000, 20000, 10000])
+    def test_switch_speed_reset(self, test_speed):
+        if not self.network.bus:
+            self.network = create_network()
+
+        lss_configure_bit_timing(self.network, test_speed)
+        lss_set_node_id(self.network, self.node_id)
+        self.network.nmt.state = 'RESET COMMUNICATION'
+
+        self.network.disconnect()
+        set_interface_bitrate(test_speed)
+        self.network = create_network()
+        self.node.associate_network(self.network)
+
+        assert self.node.sdo[0x1f56][1].raw is not None
+
+        self.network.nmt.state = 'RESET'
+        self.network.disconnect()
+        time.sleep(0.1)
+        set_interface_bitrate(10000)
+        self.network = create_network()
+        lss_set_node_id(self.network, self.node_id)
+        self.node.associate_network(self.network)
+
+        assert self.node.sdo[0x1f56][1].raw is not None
+        self.network.disconnect()
+
     @pytest.mark.parametrize("bitrate,result",
-        [(1000000, False),
-         (800000, False),
-         (500000, False),
-         (250000, False),
-         (125000, True),
-         (50000, True),
-         (20000, True),
-         (10000, True)
-    ])
+                             [(1000000, False),
+                              (800000, False),
+                              (500000, False),
+                              (250000, False),
+                              (125000, True),
+                              (50000, True),
+                              (20000, True),
+                              (10000, True)
+                              ])
     def test_switch_speed_operational(self, bitrate, result):
         if self.network.bus:
             self.network.disconnect()
