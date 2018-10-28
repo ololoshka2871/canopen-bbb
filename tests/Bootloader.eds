@@ -129,13 +129,12 @@ DefaultValue=1
 PDOMapping=0
 
 [OptionalObjects]
-SupportedObjects=6
+SupportedObjects=5
 1=0x1003
 2=0x1200
 3=0x1F50
 4=0x1F51
 5=0x1F56
-6=0x1F57
 
 [1003]
 ParameterName=Pre-defined error field
@@ -268,30 +267,6 @@ ObjectType=0x7
 DataType=0x0007
 AccessType=ro
 DefaultValue=
-PDOMapping=0
-
-[1F57]
-ParameterName=Flash status identification
-ObjectType=0x9
-;StorageLocation=RAM
-SubNumber=0x2
-
-[1F57sub0]
-ParameterName=max sub-index
-ObjectType=0x7
-;StorageLocation=RAM
-DataType=0x0005
-AccessType=ro
-DefaultValue=1
-PDOMapping=0
-
-[1F57sub1]
-ParameterName=Program Number 1
-ObjectType=0x7
-;StorageLocation=RAM
-DataType=0x0007
-AccessType=ro
-DefaultValue=0
 PDOMapping=0
 
 [ManufacturerObjects]

@@ -1,6 +1,6 @@
 
 import canopen
-import re
+import struct
 import subprocess
 import time
 
@@ -26,17 +26,39 @@ speed_map = {
 }
 
 
-class FlashStatus:
-    NO_OPERATION = 0
-    OK = 1
-    LOCKED = 2
-    ADDRESS_OUT_OF_RANGE = 3
-    ERASE_FAIL = 4
-    WRITE_FAIL = 5
-    ALIGNMENT_ERROR = 6
-    SEQUENCE_CORRUPT = 7
-    INVALID_PROGRAM = 8
-    READY_TO_START = 9
+class Error_CODE(object):
+    def __init__(self, code):
+        self.Class, self.error_register, self.additional_info =\
+            struct.unpack('>HBB', code.to_bytes(4, byteorder='big'))
+
+
+class ErrorCategorie:
+    NO_ERROR = 0x0000
+    GENERIC_ERROR_GROUP = 0x1000
+    CURRENT_ERROR_GROUP = 0x2000
+    VOLTAGE_ERROR_GROUP = 0x3000
+    TEMPERATURE_ERROR_GROUP = 0x4000
+    DEVICE_HARDWARE_ERROR_GROUP = 0x5000
+    DEVICE_SOFTWARE_ERROR_GROUP = 0x6000
+    ADDITIONAL_MODULES_ERROR_GROUP = 0x7000
+    MONITORING_ERROR_GROUP = 0x8000
+    EXTERNAL_ERROR_GROUP = 0x9000
+    ADDITIONAL_FUNCTIONS_GROUP = 0xF000
+    DEVICE_SPECIFIC_GROUP = 0xFF00
+
+
+class Error_CODES:
+    NO_ERROR = ErrorCategorie.NO_ERROR
+    FLASH_UNLOCK_FAILED = ErrorCategorie.DEVICE_HARDWARE_ERROR_GROUP | 0x550
+    FLASH_ERASE_FAILED = ErrorCategorie.DEVICE_HARDWARE_ERROR_GROUP | 0x580
+    FLASH_WRITE_FAILED = ErrorCategorie.DEVICE_HARDWARE_ERROR_GROUP | 0x590
+    APPLICATION_INCORRECT_OR_NOT_EXISTS = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x200
+    WRITE_TRANSACTION_WAS_CANCELED = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x220
+    FLASH_SEQUENCE_CORRUPT = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x251
+    FLASH_SEQUENCE_BUSY = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x253
+    APPLICATION_TOO_LARGE = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x300
+    FLASH_ADDRESS_OUT_OF_RANGE = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x330
+    FLASH_IMAGE_SIZE_ODD = ErrorCategorie.DEVICE_SOFTWARE_ERROR_GROUP | 0x340
 
 
 def create_network(device=default_interface):

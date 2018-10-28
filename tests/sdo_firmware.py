@@ -53,11 +53,6 @@ class TestSDOFirmwareRelated(object):
         cls.network.disconnect()
         set_interface_bitrate(10000)
 
-    def test_STATUS(self):
-        assert self.node.sdo[0x1F57][1].raw in (FlashStatus.OK,
-                                                FlashStatus.READY_TO_START,
-                                                FlashStatus.INVALID_PROGRAM)
-
     def test_read_firmware(self):
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             len(self.node.sdo[0x1f50][1].raw)
@@ -80,22 +75,21 @@ class TestSDOFirmwareRelated(object):
 
     def test_try_start_invalid_app(self):
         self.node.sdo[0x1F51][1].raw = 1
-        assert self.node.sdo[0x1F57][1].raw == FlashStatus.INVALID_PROGRAM
+        error = Error_CODE(self.node.sdo[0x1003][1].raw)
+        assert error.Class == Error_CODES.APPLICATION_INCORRECT_OR_NOT_EXISTS
+
+    def test_reset_errors(self):
+        self.node.sdo[0x1003][0].raw = 0
+        assert self.node.sdo[0x1003][0].raw == 1
+        assert self.node.sdo[0x1003][1].raw == Error_CODES.NO_ERROR
 
     def test_write_correct_app(self):
         data = self.firmware
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
-        assert self.node.sdo[0x1F57][1].raw == FlashStatus.OK
+        assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.NO_ERROR
 
     def test_correct_app_crc(self):
         crc = struct.unpack('<I', self.firmware[6*4:7*4])[0]
         r_crc = self.node.sdo[0x1f56][1].raw
         assert crc == r_crc
-
-    def _test_start_correct_app(self):
-        bootloader_start_app(self.node)
-        with pytest.raises(canopen.sdo.exceptions.SdoCommunicationError) as e_info:
-            status = self.node.sdo[0x1F57][1].raw
-
-        assert str(e_info.value) == 'No SDO response received'
