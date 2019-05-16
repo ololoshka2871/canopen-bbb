@@ -20,5 +20,5 @@
 
 FILE=BB-DCAN1-TJA1055-00A0
 
-dtc -O dtb -o $FILE.dtbo -b 0 -@ $SRC.dts && \
+dtc -O dtb -o $FILE.dtbo -b 0 -@ $FILE.dts && \
 mv $FILE.dtbo /lib/firmware/
