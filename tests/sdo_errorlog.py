@@ -38,4 +38,8 @@ class TestSDOErrorLogRelated(object):
     def test_reset_error_log(self):
         self.node.sdo[0x1003][0].raw = 0
 
+    def test_incorrect_reset_error_log(self):
+        with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
+            self.node.sdo[0x1003][0].raw = 1
+
 
