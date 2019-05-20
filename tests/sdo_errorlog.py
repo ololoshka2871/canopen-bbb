@@ -32,5 +32,10 @@ class TestSDOErrorLogRelated(object):
         set_interface_bitrate(10000)
 
     def test_read_error_log_depth(self):
-        len = self.node.sdo[0x1f50][0]
-        assert len is not None
+        l = self.node.sdo[0x1003][0].raw
+        assert l is not None
+
+    def test_reset_error_log(self):
+        self.node.sdo[0x1003][0].raw = 0
+
+
