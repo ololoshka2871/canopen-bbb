@@ -41,5 +41,12 @@ class TestSDOErrorLogRelated(object):
     def test_incorrect_reset_error_log(self):
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][0].raw = 1
+        assert str(e_info.value) == 'Code 0x06010000, Unsupported access to an object'
+
+    def test_try_read_missing_error_log_entries(self):
+        for i in range(1, 256):
+            with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
+                len(self.node.sdo[0x1003][i].raw)
+            assert str(e_info.value) == 'Code 0x08000023'
 
 
