@@ -11,7 +11,7 @@ boot_product_id = 0xCB01
 boot_revision = 0
 boot_serial_number = 1
 
-default_interface = 'can1'
+default_interface = 'can0'
 
 
 speed_map = {

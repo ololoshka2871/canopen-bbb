@@ -60,7 +60,7 @@ class TestLSS(object):
 
         assert boot_vendor_id == self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_VENDOR_ID)
         assert 0 != self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_PRODUCT_CODE)
-        assert 0 < self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_REVISION_NUMBER)
+        assert self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_REVISION_NUMBER) is not None
         assert self.network.lss.inquire_lss_address(canopen.lss.CS_INQUIRE_SERIAL_NUMBER) is not None
 
         lss_waiting_state(self.network)
