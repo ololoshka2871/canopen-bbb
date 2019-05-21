@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from common import *
 import can
 import pytest
