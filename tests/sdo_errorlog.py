@@ -43,10 +43,17 @@ class TestSDOErrorLogRelated(object):
             self.node.sdo[0x1003][0].raw = 1
         assert str(e_info.value) == 'Code 0x06010000, Unsupported access to an object'
 
+    def test_try_read_empty_error_log_entry(self):
+        with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
+            self.node.sdo[0x1003][1].raw is not None
+        assert str(e_info.value) == 'Code 0x08000023, Subindex does not exist'
+
     def test_try_read_missing_error_log_entries(self):
-        for i in range(1, 256):
-            with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
-                len(self.node.sdo[0x1003][i].raw)
-            assert str(e_info.value) == 'Code 0x08000023'
+        for i in range(2, 256):
+            try:
+                self.node.sdo[0x1003][i].raw is not None
+            except canopen.sdo.exceptions.SdoAbortedError as e_info:
+                assert str(e_info) == 'Code 0x06090011, Subindex does not exist'
+
 
 
