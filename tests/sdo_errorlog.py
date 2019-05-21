@@ -44,9 +44,10 @@ class TestSDOErrorLogRelated(object):
         assert str(e_info.value) == 'Code 0x06010000, Unsupported access to an object'
 
     def test_try_read_empty_error_log_entry(self):
+        self.node.sdo[0x1003][0].raw = 0
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][1].raw is not None
-        assert str(e_info.value) == 'Code 0x08000023, Subindex does not exist'
+        assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object dictionary is present'
 
     def test_try_read_missing_error_log_entries(self):
         for i in range(2, 256):
@@ -55,5 +56,6 @@ class TestSDOErrorLogRelated(object):
             except canopen.sdo.exceptions.SdoAbortedError as e_info:
                 assert str(e_info) == 'Code 0x06090011, Subindex does not exist'
 
-
-
+    def test_read_error_value(self):
+        self.node.sdo[0x1003][0].raw = 254
+        assert self.node.sdo[0x1003][1].raw == 0xff1300fe  # TEST_ERROR_VALUE
