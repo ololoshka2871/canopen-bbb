@@ -87,7 +87,7 @@ class TestSDOFirmwareRelated(object):
     # Сброс лога ошибок
     def test_reset_errors(self):
         self.node.sdo[0x1003][0].raw = 0
-        assert self.node.sdo[0x1003][0].raw == 1
+        assert self.node.sdo[0x1003][0].raw == 0
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][1].raw is not None
         assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object ' \
