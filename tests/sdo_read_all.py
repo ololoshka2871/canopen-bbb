@@ -63,7 +63,9 @@ class TestSDOReadAll(object):
                 try:
                     v = self.node.sdo[entry.index][subindex].raw
                 except canopen.sdo.exceptions.SdoAbortedError as f:
-                    if f.code != 0x06010001:
+                    if entry.index == 0x1003 and subindex > 0 and f.code == 0x08000023
+                        pass # лог ошибок может быть пуст
+                    elif f.code != 0x06010001:
                         raise f
         else:
             try:
