@@ -35,7 +35,7 @@ class TestSDOErrorLogRelated(object):
 
     # Проверка чтения поличества ошибок (может быть любое число 0-255)
     def test_read_error_log_depth(self):
-        assert 0 >= self.node.sdo[0x1003][0].raw >= 255
+        assert 255 >= self.node.sdo[0x1003][0].raw >= 0
 
     # Проверка сброса лога
     def test_reset_error_log(self):
@@ -54,7 +54,7 @@ class TestSDOErrorLogRelated(object):
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][1].raw is not None
         assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object ' \
-                                    'dictionary is present '
+                                    'dictionary is present'
 
     # Попытка чтения других записей лога - должна возвращать ошибку, так как их не существует
     def test_try_read_missing_error_log_entries(self):
