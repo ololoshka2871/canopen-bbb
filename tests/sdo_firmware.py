@@ -4,7 +4,7 @@ import pytest
 import struct
 import time
 
-# Установлено, что на скорости 10000 буфер передатчика не более 182 байт
+# Установлено, что на скорости 10000 буфер передатчика собаки не более 182 байт
 
 
 def align(v, alignnment):
@@ -53,12 +53,14 @@ class TestSDOFirmwareRelated(object):
         cls.network.disconnect()
         set_interface_bitrate(10000)
 
+    # Попытка чтения текущегго приложения должна завершиться ошибкой - доступ - только запись
     def test_read_firmware(self):
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             len(self.node.sdo[0x1f50][1].raw)
 
         assert str(e_info.value) == 'Code 0x06010001, Attempt to read a write only object'
 
+    # Записываем в область приложения нули блочным способом или нет, если ошибка
     def test_restore_after_invalid_write(self):
         data = bytearray([x & 0xff for x in range(183)])
         try:
@@ -70,25 +72,34 @@ class TestSDOFirmwareRelated(object):
             with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
                 f.write(data)
 
+    # проверяем что в области проверки статуса приложения 0x1f56sub1 0 - invalid application
     def test_invalid_app_crc(self):
         assert self.node.sdo[0x1f56][1].raw == 0
 
+    # Пытаемся запустить неверное приложение, в логе ошибок должен появится код APPLICATION_INCORRECT_OR_NOT_EXISTS
     def test_try_start_invalid_app(self):
         self.node.sdo[0x1F51][1].raw = 1
         error = Error_CODE(self.node.sdo[0x1003][1].raw)
         assert error.Class == Error_CODES.APPLICATION_INCORRECT_OR_NOT_EXISTS
 
+    # Сброс лога ошибок
     def test_reset_errors(self):
         self.node.sdo[0x1003][0].raw = 0
         assert self.node.sdo[0x1003][0].raw == 1
-        assert self.node.sdo[0x1003][1].raw == Error_CODES.NO_ERROR
+        with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
+            self.node.sdo[0x1003][1].raw is not None
+        assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object ' \
+                                    'dictionary is present '
 
+    # Записываем корректный образ приложения
     def test_write_correct_app(self):
         data = self.firmware
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
         assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.NO_ERROR
 
+    # Сравниваем указанный в образе CRC32 образа приложения с тем, что вернет нам бутлоадер насчитавций фактическое
+    # значение
     def test_correct_app_crc(self):
         crc = struct.unpack('<I', self.firmware[6*4:7*4])[0]
         r_crc = self.node.sdo[0x1f56][1].raw
