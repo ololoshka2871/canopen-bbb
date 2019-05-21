@@ -31,24 +31,30 @@ class TestSDOErrorLogRelated(object):
         cls.network.disconnect()
         set_interface_bitrate(10000)
 
+    # Проверка чтения поличества ошибок (может быть любое число 0-255)
     def test_read_error_log_depth(self):
-        l = self.node.sdo[0x1003][0].raw
-        assert l is not None
+        assert 0 >= self.node.sdo[0x1003][0].raw >= 255
 
+    # Проверка сброса лога
     def test_reset_error_log(self):
         self.node.sdo[0x1003][0].raw = 0
+        assert 0 == self.node.sdo[0x1003][0].raw
 
+    # Проверка того, что запись отличного от 0 значения в 0x1003sub0 вызывает ошибку
     def test_incorrect_reset_error_log(self):
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][0].raw = 1
         assert str(e_info.value) == 'Code 0x06010000, Unsupported access to an object'
 
+    # Сброс лога, затем попытка прочитать верхушку, должна вернуться ошибка
     def test_try_read_empty_error_log_entry(self):
         self.node.sdo[0x1003][0].raw = 0
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][1].raw is not None
-        assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object dictionary is present'
+        assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object ' \
+                                    'dictionary is present '
 
+    # Попытка чтения других записей лога - должна возвращать ошибку, так как их не существует
     def test_try_read_missing_error_log_entries(self):
         for i in range(2, 256):
             try:
@@ -56,6 +62,7 @@ class TestSDOErrorLogRelated(object):
             except canopen.sdo.exceptions.SdoAbortedError as e_info:
                 assert str(e_info) == 'Code 0x06090011, Subindex does not exist'
 
+    # Установка специального значения в лог ошибок - чисто ради теста.
     def test_read_error_value(self):
         self.node.sdo[0x1003][0].raw = 254
         assert self.node.sdo[0x1003][1].raw == 0xff1300fe  # TEST_ERROR_VALUE
