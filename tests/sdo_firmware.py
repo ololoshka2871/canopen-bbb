@@ -82,7 +82,7 @@ class TestSDOFirmwareRelated(object):
     def test_try_start_invalid_app(self):
         self.node.sdo[0x1F51][1].raw = 1
         error = Error_CODE(self.node.sdo[0x1003][1].raw)
-        assert error.Class == Error_CODES.APPLICATION_INCORRECT_OR_NOT_EXISTS
+        assert error.code == Error_CODES.APPLICATION_INCORRECT_OR_NOT_EXISTS
 
     # Сброс лога ошибок
     def test_reset_errors(self):
@@ -91,7 +91,7 @@ class TestSDOFirmwareRelated(object):
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as e_info:
             self.node.sdo[0x1003][1].raw is not None
         assert str(e_info.value) == 'Code 0x08000023, Object dictionary dynamic generation fails or no object ' \
-                                    'dictionary is present '
+                                    'dictionary is present'
 
     # Записываем корректный образ приложения
     def test_write_correct_app(self):

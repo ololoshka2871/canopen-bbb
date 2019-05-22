@@ -29,8 +29,9 @@ speed_map = {
 
 class Error_CODE(object):
     def __init__(self, code):
-        self.Class, self.error_register, self.additional_info = \
-            struct.unpack('>HBB', struct.pack('>I', code))
+        self.code = code
+        self.Class = code >> 12 & 0x0F
+        self.additional_info = code & 0x0FFF
 
 
 class ErrorCategorie:
@@ -45,7 +46,6 @@ class ErrorCategorie:
     MONITORING_ERROR_GROUP = 0x8000
     EXTERNAL_ERROR_GROUP = 0x9000
     ADDITIONAL_FUNCTIONS_GROUP = 0xF000
-    DEVICE_SPECIFIC_GROUP = 0xFF00
 
 
 class Error_CODES:
