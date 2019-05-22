@@ -63,3 +63,6 @@ pytest тестовый сценарий. Проводит тестирован�
 * Запустить тест sdo_errorlog.py
 * Запустить тест sdo_read_all.py
 * Запустить тест sdo_firmware.py
+
+Можно сразу все пачкой, кроме mnt.py
+`$ pytest lss.py lss_bitrates.py sdo_errorlog.py sdo_read_all.py sdo_firmware.py`
