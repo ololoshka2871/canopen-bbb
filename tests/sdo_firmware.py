@@ -44,6 +44,22 @@ class TestSDOFirmwareRelated(object):
 
     @classmethod
     def setup_class(cls):
+        with open('app.bin', 'rb') as f:
+            cls.firmware = f.read()
+
+        key = TestSDOFirmwareRelated.getkey(cls.firmware[0:9*4])
+
+        cls.e_firmware = cls.firmware[:]
+
+        cripted_part_len = len(cls.e_firmware[9 * 4:])
+        if cripted_part_len % AES.block_size != 0:
+            print('app_size={}, adding {} bytes'.format(cripted_part_len, AES.block_size - cripted_part_len))
+            cls.e_firmware += b'\x00' * (AES.block_size - cripted_part_len)
+
+        iv = cls.firmware[4:16 + 4]
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        cls.e_firmware[9 * 4:] = cipher.encrypt(cls.e_firmware[9 * 4:])
+
         test_speed = 125000
         cls.node_id = 16
         cls.network = create_network()
@@ -61,15 +77,6 @@ class TestSDOFirmwareRelated(object):
 
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
-        with open('app.bin', 'rb') as f:
-            cls.firmware = f.read()
-
-        key = TestSDOFirmwareRelated.getkey(cls.firmware[0:9*4])
-
-        cls.e_firmware = cls.firmware[:]
-        iv = cls.firmware[4:16 + 4]
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        cls.e_firmware[9 * 4:] = cipher.encrypt(cls.e_firmware[9 * 4:])
 
     @classmethod
     def teardown_class(cls):
