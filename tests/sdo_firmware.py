@@ -7,7 +7,6 @@ import struct
 import time
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA224
-import hexdump
 
 # Установлено, что на скорости 10000 буфер передатчика собаки не более 182 байт
 
@@ -53,12 +52,12 @@ class TestSDOFirmwareRelated(object):
 
         cripted_part_len = len(cls.e_firmware[9 * 4:])
         if cripted_part_len % AES.block_size != 0:
-            print('app_size={}, adding {} bytes'.format(cripted_part_len, AES.block_size - cripted_part_len))
-            cls.e_firmware += b'\x00' * (AES.block_size - cripted_part_len)
+            to_add = AES.block_size - cripted_part_len % AES.block_size
+            cls.e_firmware += b'\x00' * to_add
 
         iv = cls.firmware[4:16 + 4]
         cipher = AES.new(key, AES.MODE_CBC, iv)
-        cls.e_firmware[9 * 4:] = cipher.encrypt(cls.e_firmware[9 * 4:])
+        cls.e_firmware = cls.e_firmware[0:9*4] + cipher.encrypt(cls.e_firmware[9 * 4:])
 
         test_speed = 125000
         cls.node_id = 16
@@ -126,7 +125,6 @@ class TestSDOFirmwareRelated(object):
     # Записываем корректный образ приложения
     def test_write_correct_app(self):
         data = self.e_firmware
-        hexdump.hexdump(data[:128])
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
         assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.NO_ERROR
