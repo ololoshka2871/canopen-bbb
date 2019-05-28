@@ -5,6 +5,9 @@ import can
 import pytest
 import struct
 import time
+from Crypto.Cipher import AES
+from Crypto.Hash import SHA224
+import hexdump
 
 # Установлено, что на скорости 10000 буфер передатчика собаки не более 182 байт
 
@@ -26,6 +29,19 @@ def chunks(l, n):
 
 
 class TestSDOFirmwareRelated(object):
+    @staticmethod
+    def getkey(header):
+        h = SHA224.new()
+        h.update(header)
+        digestsha224 = h.digest()
+        key = [None] * 16
+        for i in range(14):
+            key[i] = digestsha224[i * 2]
+
+        key[14] = digestsha224[len(digestsha224) - 3]
+        key[15] = digestsha224[len(digestsha224) - 1]
+        return ''.join(key)
+
     @classmethod
     def setup_class(cls):
         test_speed = 125000
@@ -47,6 +63,13 @@ class TestSDOFirmwareRelated(object):
         cls.node.associate_network(cls.network)
         with open('app.bin', 'rb') as f:
             cls.firmware = f.read()
+
+        key = TestSDOFirmwareRelated.getkey(cls.firmware[0:9*4])
+
+        cls.e_firmware = cls.firmware[:]
+        iv = cls.firmware[4:16 + 4]
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        cls.e_firmware[9 * 4:] = cipher.encrypt(cls.e_firmware[9 * 4:])
 
     @classmethod
     def teardown_class(cls):
@@ -95,7 +118,8 @@ class TestSDOFirmwareRelated(object):
 
     # Записываем корректный образ приложения
     def test_write_correct_app(self):
-        data = self.firmware
+        data = self.e_firmware
+        hexdump.hexdump(data[:128])
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
         assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.NO_ERROR
