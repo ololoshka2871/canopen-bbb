@@ -127,7 +127,7 @@ class TestSDOFirmwareRelated(object):
         data = self.e_firmware
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
-        assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.NO_ERROR
+        assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.APPLICATION_READY_TO_START
 
     # Сравниваем указанный в образе CRC32 образа приложения с тем, что вернет нам бутлоадер насчитавций фактическое
     # значение

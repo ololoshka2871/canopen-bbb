@@ -1,2 +1,4 @@
 canopen==0.8.1
 python-can==2.2.1
+hexdump
+pycrypto
