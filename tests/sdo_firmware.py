@@ -43,21 +43,8 @@ class TestSDOFirmwareRelated(object):
 
     @classmethod
     def setup_class(cls):
-        with open('app.bin', 'rb') as f:
+        with open('app.deploy', 'rb') as f:
             cls.firmware = f.read()
-
-        key = TestSDOFirmwareRelated.getkey(cls.firmware[0:9*4])
-
-        cls.e_firmware = cls.firmware[:]
-
-        cripted_part_len = len(cls.e_firmware[9 * 4:])
-        if cripted_part_len % AES.block_size != 0:
-            to_add = AES.block_size - cripted_part_len % AES.block_size
-            cls.e_firmware += b'\x00' * to_add
-
-        iv = cls.firmware[4:16 + 4]
-        cipher = AES.new(key, AES.MODE_CBC, iv)
-        cls.e_firmware = cls.e_firmware[0:9*4] + cipher.encrypt(cls.e_firmware[9 * 4:])
 
         test_speed = 125000
         cls.node_id = 16
@@ -124,7 +111,7 @@ class TestSDOFirmwareRelated(object):
 
     # Записываем корректный образ приложения
     def test_write_correct_app(self):
-        data = self.e_firmware
+        data = self.firmware
         with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
             f.write(data)
         assert Error_CODE(self.node.sdo[0x1003][1].raw).Class == Error_CODES.APPLICATION_READY_TO_START
