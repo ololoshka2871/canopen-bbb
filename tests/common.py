@@ -26,6 +26,8 @@ speed_map = {
     1000000: 0,
 }
 
+headed_size = 9 * 4
+
 
 class Error_CODE(object):
     def __init__(self, code):
