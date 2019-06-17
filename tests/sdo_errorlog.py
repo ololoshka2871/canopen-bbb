@@ -66,5 +66,8 @@ class TestSDOErrorLogRelated(object):
 
     # Установка специального значения в лог ошибок - чисто ради теста.
     def test_read_error_value(self):
-        self.node.sdo[0x1003][0].raw = 254
-        assert self.node.sdo[0x1003][1].raw == 0xff1300fe  # TEST_ERROR_VALUE
+        try:
+            self.node.sdo[0x1003][0].raw = 254
+            assert self.node.sdo[0x1003][1].raw == 0xff1300fe  # TEST_ERROR_VALUE
+        except canopen.sdo.exceptions.SdoAbortedError as e_info:
+            assert str(e_info) == 'Code 0x06010000, Unsupported access to an object'
