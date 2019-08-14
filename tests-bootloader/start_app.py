@@ -14,6 +14,6 @@ lss_configuration_state(nw)
 lss_set_node_id(nw, node_id)
 lss_waiting_state(nw)
 
-node = canopen.RemoteNode(node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
+node = canopen.RemoteNode(node_id, 'Bootloader.eds')
 node.associate_network(nw)
 bootloader_start_app(node)
