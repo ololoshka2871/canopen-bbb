@@ -8,7 +8,7 @@ import time
 
 # bootloader LSS id
 boot_vendor_id = 0x004f038C
-boot_product_id = 0xCB01
+boot_product_id = 0xC001
 boot_revision = 0
 boot_serial_number = 1
 

@@ -8,6 +8,7 @@ stb_pin = 60
 en_pin = 50
 wake_pin = 51
 
+
 def print_usage():
     print('Usage: {} [STB_STATE] [EN_STATE] [WAKE_STATE]'.format(sys.argv[0]))
 

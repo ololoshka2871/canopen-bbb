@@ -12,17 +12,11 @@ class TestLSS(object):
     def setup_class(cls):
         set_interface_bitrate(10000)
         cls.network = create_network()
-        cls.network.nmt.state = 'RESET'
         time.sleep(0.1)
 
     @classmethod
     def teardown_class(cls):
         cls.network.disconnect()
-
-    # not working in library
-    #def test_identify_remote_slave(network):
-    #    assert network.lss.send_identify_remote_slave(vendor_id, product_id,
-    #        0, 1, 1, 2)
 
     def test_set_config_mode(self):
         self.network.lss.send_switch_state_global(self.network.lss.CONFIGURATION_STATE)

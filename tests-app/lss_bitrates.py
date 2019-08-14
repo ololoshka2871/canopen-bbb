@@ -11,8 +11,6 @@ class TestLSSBitrates(object):
     def setup_class(cls):
         set_interface_bitrate(10000)
         nw = create_network()
-        nw.nmt.state = 'RESET'
-        nw.disconnect()
         time.sleep(0.1)
 
     @staticmethod

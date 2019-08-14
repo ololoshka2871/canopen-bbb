@@ -1,0 +1,1 @@
+../tests-bootloader/canopen_lss_fastscan.py
