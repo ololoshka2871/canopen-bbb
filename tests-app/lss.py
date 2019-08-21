@@ -68,3 +68,46 @@ class TestLSS(object):
             assert node_id == self.network.lss.inquire_node_id()
 
         lss_waiting_state(self.network)
+
+    def test_set_node_id_reset_comm(self):
+        lss_configuration_state(self.network)
+
+        node_id = 15
+        self.network.lss.configure_node_id(node_id)
+        assert node_id == self.network.lss.inquire_node_id()
+        self.network.lss.store_configuration()
+        lss_waiting_state(self.network)
+
+        node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+        node.associate_network(self.network)
+        node.nmt.state = 'RESET COMMUNICATION'
+
+        time.sleep(0.1)
+
+        lss_configuration_state(self.network)
+        id = self.network.lss.inquire_node_id()
+        lss_waiting_state(self.network)
+        assert id == node_id
+
+    def test_set_node_id_reset_comm_new(self):
+        lss_configuration_state(self.network)
+
+        node_id = 15
+        self.network.lss.configure_node_id(node_id)
+        assert node_id == self.network.lss.inquire_node_id()
+        self.network.lss.store_configuration()
+        lss_waiting_state(self.network)
+
+        node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+        node.associate_network(self.network)
+        node.nmt.state = 'RESET COMMUNICATION'
+
+        time.sleep(0.1)
+
+        lss_configuration_state(self.network)
+        id = self.network.lss.inquire_node_id()
+        assert id == node_id
+        new_node_id = node_id + 1
+        self.network.lss.configure_node_id(new_node_id)
+        assert new_node_id == self.network.lss.inquire_node_id()
+        lss_waiting_state(self.network)
