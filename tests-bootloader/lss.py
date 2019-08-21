@@ -81,7 +81,7 @@ class TestLSS(object):
         node_id = 15
         self.network.lss.configure_node_id(node_id)
         assert node_id == self.network.lss.inquire_node_id()
-
+        self.network.lss.store_configuration()
         lss_waiting_state(self.network)
 
         node = canopen.RemoteNode(node_id, 'Bootloader.eds')
