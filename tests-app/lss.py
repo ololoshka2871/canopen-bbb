@@ -78,7 +78,7 @@ class TestLSS(object):
         self.network.lss.store_configuration()
         lss_waiting_state(self.network)
 
-        node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+        node = canopen.RemoteNode(node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         node.associate_network(self.network)
         node.nmt.state = 'RESET COMMUNICATION'
 
@@ -98,7 +98,7 @@ class TestLSS(object):
         self.network.lss.store_configuration()
         lss_waiting_state(self.network)
 
-        node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+        node = canopen.RemoteNode(node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         node.associate_network(self.network)
         node.nmt.state = 'RESET COMMUNICATION'
 
