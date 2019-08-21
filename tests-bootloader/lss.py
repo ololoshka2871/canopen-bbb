@@ -85,6 +85,7 @@ class TestLSS(object):
         lss_waiting_state(self.network)
 
         node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+        node.associate_network(self.network)
         node.nmt.state = 'RESET COMMUNICATION'
 
         time.sleep(0.1)
