@@ -131,13 +131,14 @@ class TestNMT(object):
 
         self.network = create_network()
         lss_set_node_id(self.network, self.node_id)
+        self.node.associate_network(self.network)
         assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
         lss_configuration_state(self.network)
         assert self._setDeviceBitrate(bitrate) == result
         lss_waiting_state(self.network)
 
-        self.network.nmt.state = 'RESET COMMUNICATION'
+        self.node.nmt.state = 'RESET COMMUNICATION'
         self.network.disconnect()
         if result:
             set_interface_bitrate(bitrate)
