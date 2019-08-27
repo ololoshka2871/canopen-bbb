@@ -35,10 +35,6 @@ class TestNMT(object):
     def _reset_delay(self):
         time.sleep(0.5)
 
-    def test_initial_state(self):
-        lss_set_node_id(self.network, self.node_id)
-        assert self.node.nmt.state == 'PRE-OPERATIONAL'
-
     def test_reset_com(self):
         lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET COMMUNICATION'
@@ -135,9 +131,7 @@ class TestNMT(object):
 
         self.network = create_network()
         lss_set_node_id(self.network, self.node_id)
-        self._reset_delay()
         self.node.associate_network(self.network)
-        assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
         lss_configuration_state(self.network)
         assert self._setDeviceBitrate(bitrate) == result
@@ -150,7 +144,5 @@ class TestNMT(object):
 
         self.network = create_network()
         self.node.associate_network(self.network)
-        self._reset_delay()
-        assert self.node.nmt.state == 'PRE-OPERATIONAL'
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
