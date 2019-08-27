@@ -147,3 +147,15 @@ class TestNMT(object):
         self.node.associate_network(self.network)
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
+
+    def test_go_to_bootloader(self):
+        self.network.nmt.state = 'STOPPED'
+        self._reset_delay()
+        lss_waiting_state(self.network)
+        lss_configuration_state(self.network)
+        lss_set_node_id(self.network, self.node_id)
+        lss_waiting_state(self.network)
+
+        node = canopen.RemoteNode(self.node_id, '../tests-bootloader/Bootloader.eds')
+        node.associate_network(self.network)
+        bootloader_start_app(node)
