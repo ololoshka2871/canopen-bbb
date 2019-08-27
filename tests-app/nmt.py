@@ -44,8 +44,6 @@ class TestNMT(object):
         lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET'
         self._reset_delay()
-        lss_set_node_id(self.network, self.node_id)
-        self.node.nmt.wait_for_bootup(1)
 
     def test_node_reset_com(self):
         lss_set_node_id(self.network, self.node_id)
@@ -56,8 +54,8 @@ class TestNMT(object):
         lss_set_node_id(self.network, self.node_id)
         self.node.nmt.state = 'RESET'
         self._reset_delay()
-        lss_set_node_id(self.network, self.node_id)
-        self.node.nmt.wait_for_bootup(1)
+        assert self.node.nmt.state == 'PRE-OPERATIONAL'
+        assert self.network.lss.inquire_node_id() == self.node_id
 
     def test_node_preop_op(self):
         self.node.nmt.state = 'PRE-OPERATIONAL'
