@@ -130,8 +130,8 @@ class TestNMT(object):
             self.network.disconnect()
 
         self.network = create_network()
-        assert self.network.nmt.state == 'PRE-OPERATIONAL'
         lss_set_node_id(self.network, self.node_id)
+        assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
         lss_configuration_state(self.network)
         assert self._setDeviceBitrate(bitrate) == result
@@ -144,6 +144,6 @@ class TestNMT(object):
 
         self.network = create_network()
         self.node.associate_network(self.network)
-        self.network.nmt.state = 'PRE-OPERATIONAL'
-        assert 4 == self.node.sdo[0x1018][0].raw
+        assert self.node.nmt.state == 'PRE-OPERATIONAL'
+        assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
