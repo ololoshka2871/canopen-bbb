@@ -71,9 +71,10 @@ class TestNMT(object):
         self.node.nmt.state = 'PRE-OPERATIONAL'
         assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
-    @pytest.mark.parametrize('mode', ['PRE-OPERATIONAL', 'STOPPED', 'PRE-OPERATIONAL'])
     def test_disable_LSS_in_operation_mode(self, mode):
-        self.network.nmt.state = mode
+        self.network.nmt.state = 'RESET COMMUNICATION'
+        self._reset_delay()
+        self.network.nmt.state = 'OPERATIONAL'
         lss_configuration_state(self.network)
 
         with pytest.raises(canopen.lss.LssError) as e_info:
