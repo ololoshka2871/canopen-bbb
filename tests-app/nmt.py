@@ -71,7 +71,7 @@ class TestNMT(object):
         self.node.nmt.state = 'PRE-OPERATIONAL'
         assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
-    def test_disable_LSS_in_operation_mode(self, mode):
+    def test_disable_LSS_in_operation_mode(self):
         self.network.nmt.state = 'RESET COMMUNICATION'
         self._reset_delay()
         self.network.nmt.state = 'OPERATIONAL'
