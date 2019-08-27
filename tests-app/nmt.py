@@ -65,8 +65,11 @@ class TestNMT(object):
 
     def test_node_preop_op(self):
         self.node.nmt.state = 'PRE-OPERATIONAL'
+        assert self.node.nmt.state == 'PRE-OPERATIONAL'
         self.node.nmt.state = 'OPERATIONAL'
+        assert self.node.nmt.state == 'OPERATIONAL'
         self.node.nmt.state = 'PRE-OPERATIONAL'
+        assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
     @pytest.mark.parametrize('mode', ['PRE-OPERATIONAL', 'STOPPED', 'PRE-OPERATIONAL'])
     def test_disable_LSS_in_operation_mode(self, mode):
@@ -99,7 +102,7 @@ class TestNMT(object):
         self.network = create_network()
         self.node.associate_network(self.network)
 
-        assert self.node.sdo[0x1f56][1].raw is not None
+        assert self.node.sdo[0x1200][0].raw is not None
 
         self.network.nmt.state = 'RESET'
         self.network.disconnect()
@@ -109,7 +112,7 @@ class TestNMT(object):
         lss_set_node_id(self.network, self.node_id)
         self.node.associate_network(self.network)
 
-        assert self.node.sdo[0x1f56][1].raw is not None
+        assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
 
     @pytest.mark.parametrize("bitrate,result",
@@ -127,7 +130,7 @@ class TestNMT(object):
             self.network.disconnect()
 
         self.network = create_network()
-        self.network.nmt.state = 'PRE-OPERATIONAL'
+        assert self.network.nmt.state == 'PRE-OPERATIONAL'
         lss_set_node_id(self.network, self.node_id)
 
         lss_configuration_state(self.network)
@@ -141,6 +144,6 @@ class TestNMT(object):
 
         self.network = create_network()
         self.node.associate_network(self.network)
-        self.network.nmt.state = 'OPERATIONAL'
+        self.network.nmt.state = 'PRE-OPERATIONAL'
         assert 4 == self.node.sdo[0x1018][0].raw
         self.network.disconnect()
