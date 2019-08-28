@@ -67,6 +67,10 @@ class TestSDOReadAll(object):
                 except canopen.sdo.exceptions.SdoAbortedError as f:
                     if entry.index == 0x1003 and subindex > 0 and f.code == 0x08000023:
                         pass  # лог ошибок может быть пуст
+
+                    if entry.index == 0x1800 and subindex == 4 and f.code == 0x06090011:
+                        pass  # это так и должно быть, этого сабиндекса нет
+
                     elif f.code != 0x06010001:
                         raise f
         else:
