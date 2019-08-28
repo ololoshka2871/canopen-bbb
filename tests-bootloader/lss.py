@@ -101,13 +101,15 @@ class TestLSS(object):
         try:
             self.network.lss.configure_node_id(node_id)
             self.network.lss.store_configuration()
-
-            node = canopen.RemoteNode(node_id, 'Bootloader.eds')
-            node.associate_network(self.network)
-            assert node.sdo[0x1f56][1].raw is not None
-
-        finally:
+        except Exception as e :
             lss_waiting_state(self.network)
+            raise e
+
+        time.sleep(0.1)
+        lss_waiting_state(self.network)
+        node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+        node.associate_network(self.network)
+        assert node.sdo[0x1f56][1].raw is not None
 
     def test_lss_set_addr1(self):
         self.lss_set_addr(1)
