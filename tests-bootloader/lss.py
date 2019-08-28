@@ -94,3 +94,24 @@ class TestLSS(object):
         id = self.network.lss.inquire_node_id()
         lss_waiting_state(self.network)
         assert id == node_id
+
+    @pytest.mark.parametrize('node_id', [
+        97,
+        1,
+        #5,
+        #10,
+        #18,
+        #36,
+    ])
+    def test_change_lss_config_after_initial_set(self, node_id):
+        lss_configuration_state(self.network)
+
+        try:
+            self.network.lss.configure_node_id(node_id)
+            self.network.lss.store_configuration()
+
+            node = canopen.RemoteNode(node_id, 'Bootloader.eds')
+            node.associate_network(self.network)
+
+        finally:
+            lss_waiting_state(self.network)

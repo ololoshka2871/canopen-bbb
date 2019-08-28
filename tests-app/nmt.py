@@ -151,11 +151,12 @@ class TestNMT(object):
     def test_go_to_bootloader(self):
         self.network.nmt.state = 'STOPPED'
         self._reset_delay()
-        lss_waiting_state(self.network)
-        lss_configuration_state(self.network)
-        lss_set_node_id(self.network, self.node_id)
-        lss_waiting_state(self.network)
+        node_id = self.node_id + 1
 
-        node = canopen.RemoteNode(self.node_id, '../tests-bootloader/Bootloader.eds')
+        # configure lss in bootloader
+        lss_set_node_id(self.network, node_id)
+
+        node = canopen.RemoteNode(node_id, '../tests-bootloader/Bootloader.eds')
         node.associate_network(self.network)
+        # start application
         bootloader_start_app(node)
