@@ -104,15 +104,16 @@ class TestLSS(object):
 
             node = canopen.RemoteNode(node_id, 'Bootloader.eds')
             node.associate_network(self.network)
+            assert node.sdo[0x1f56][1].raw is not None
 
         finally:
             lss_waiting_state(self.network)
 
     def test_lss_set_addr1(self):
-        lss_set_addr(1)
+        self.lss_set_addr(1)
 
     def test_lss_set_addr2(self):
-        lss_set_addr(2)
+        self.lss_set_addr(2)
 
     @pytest.mark.parametrize('node_id', [
         97,
@@ -123,4 +124,4 @@ class TestLSS(object):
         36,
     ])
     def test_change_lss_config_after_initial_set(self, node_id):
-        lss_set_addr(node_id)
+        self.lss_set_addr(node_id)
