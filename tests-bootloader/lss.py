@@ -95,15 +95,7 @@ class TestLSS(object):
         lss_waiting_state(self.network)
         assert id == node_id
 
-    @pytest.mark.parametrize('node_id', [
-        97,
-        1,
-        #5,
-        #10,
-        #18,
-        #36,
-    ])
-    def test_change_lss_config_after_initial_set(self, node_id):
+    def lss_set_addr(self, node_id):
         lss_configuration_state(self.network)
 
         try:
@@ -115,3 +107,20 @@ class TestLSS(object):
 
         finally:
             lss_waiting_state(self.network)
+
+    def test_lss_set_addr1(self):
+        lss_set_addr(1)
+
+    def test_lss_set_addr2(self):
+        lss_set_addr(2)
+
+    @pytest.mark.parametrize('node_id', [
+        97,
+        1,
+        5,
+        10,
+        18,
+        36,
+    ])
+    def test_change_lss_config_after_initial_set(self, node_id):
+        lss_set_addr(node_id)
