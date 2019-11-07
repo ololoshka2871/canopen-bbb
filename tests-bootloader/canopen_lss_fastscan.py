@@ -74,3 +74,4 @@ Revision Number = {}
 Serial Number = {}'''.format(*LSS_id))
     else:
         print('Fast scan failled.')
+    nw.disconnect()
