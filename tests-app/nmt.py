@@ -94,25 +94,36 @@ class TestNMT(object):
         if not self.network.bus:
             self.network = create_network()
 
+        # set new speed
         lss_configure_bit_timing(self.network, test_speed)
         lss_set_node_id(self.network, self.node_id)
+        # apply and restart communication
         self.network.nmt.state = 'RESET COMMUNICATION'
 
+        # apply host speed
         self.network.disconnect()
         set_interface_bitrate(test_speed)
+
+        # reconnect
         self.network = create_network()
         self.node.associate_network(self.network)
 
+        # check device online
         assert self.node.sdo[0x1200][0].raw is not None
 
+        # reset device
         self.network.nmt.state = 'RESET'
         self.network.disconnect()
-        time.sleep(0.1)
+        self._reset_delay()
+        # restore default bitrate
         set_interface_bitrate(10000)
         self.network = create_network()
+
+        # set bootolader node id
         lss_set_node_id(self.network, self.node_id)
         self.node.associate_network(self.network)
 
+        # check if bootloader online
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
 
