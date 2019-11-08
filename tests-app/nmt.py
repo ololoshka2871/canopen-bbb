@@ -121,9 +121,10 @@ class TestNMT(object):
 
         # set application node id
         lss_set_node_id(self.network, self.node_id)
-        self.node.associate_network(self.network)
         # delay for can finish booting
-        time.sleep(0.1)
+        time.sleep(1)
+
+        self.node.associate_network(self.network)
         # check if app online
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
