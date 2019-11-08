@@ -111,7 +111,7 @@ class TestNMT(object):
         # check device online
         assert self.node.sdo[0x1200][0].raw is not None
 
-        # reset device
+        # restart application
         self.network.nmt.state = 'RESET'
         self.network.disconnect()
         self._reset_delay()
@@ -119,11 +119,12 @@ class TestNMT(object):
         set_interface_bitrate(10000)
         self.network = create_network()
 
-        # set bootolader node id
+        # set application node id
         lss_set_node_id(self.network, self.node_id)
         self.node.associate_network(self.network)
-
-        # check if bootloader online
+        # delay for can finish booting
+        time.sleep(0.1)
+        # check if app online
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
 
