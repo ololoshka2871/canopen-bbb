@@ -160,8 +160,12 @@ class TestNMT(object):
         self.node.associate_network(self.network)
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
+        self.network = None
 
     def test_go_to_bootloader(self):
+        if not self.network:
+            self.network = create_network()
+
         self.network.nmt.state = 'STOPPED'
         self._reset_delay()
         node_id = self.node_id + 1

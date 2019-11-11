@@ -89,6 +89,11 @@ def reset_network(network):
     time.sleep(0.1)
 
 
+def network_operational(network):
+    network.nmt.state = 'OPERATIONAL'
+    time.sleep(0.1)
+
+
 def lss_configure_bit_timing(network, speed):
     lss_configuration_state(network)
     network.lss.configure_bit_timing(speed_map[speed])
@@ -99,6 +104,14 @@ def lss_configure_bit_timing(network, speed):
 def lss_set_node_id(network, node_id):
     lss_configuration_state(network)
     network.lss.configure_node_id(node_id)
+    network.lss.store_configuration()
+    lss_waiting_state(network)
+
+
+def lss_configure_node(network, node_id, speed):
+    lss_configuration_state(network)
+    network.lss.configure_node_id(node_id)
+    network.lss.configure_bit_timing(speed_map[speed])
     network.lss.store_configuration()
     lss_waiting_state(network)
 

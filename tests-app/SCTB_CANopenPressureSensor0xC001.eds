@@ -116,7 +116,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0007
 AccessType=ro
-DefaultValue=0
+DefaultValue=0x40ab6ba
 PDOMapping=0
 
 [1018sub4]
@@ -129,7 +129,7 @@ DefaultValue=1
 PDOMapping=0
 
 [OptionalObjects]
-SupportedObjects=16
+SupportedObjects=18
 1=0x1003
 2=0x1005
 3=0x1006
@@ -141,11 +141,13 @@ SupportedObjects=16
 9=0x1015
 10=0x1017
 11=0x1019
-12=0x1029
-13=0x1200
-14=0x1800
-15=0x1A00
-16=0x1F80
+12=0x1021
+13=0x1022
+14=0x1029
+15=0x1200
+16=0x1800
+17=0x1A00
+18=0x1F80
 
 [1003]
 ParameterName=Pre-defined error field
@@ -204,7 +206,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0009
 AccessType=const
-DefaultValue=CANopenPresureSensor
+DefaultValue=__20________________
 PDOMapping=0
 
 [1009]
@@ -213,7 +215,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0009
 AccessType=const
-DefaultValue=1.00
+DefaultValue=__20________________
 PDOMapping=0
 
 [100A]
@@ -222,7 +224,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0009
 AccessType=const
-DefaultValue=PATCHME
+DefaultValue=__10______
 PDOMapping=0
 
 [1014]
@@ -261,6 +263,24 @@ AccessType=rw
 DefaultValue=0
 PDOMapping=0
 
+[1021]
+ParameterName=Store EDS
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x000F
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[1022]
+ParameterName=EDS Store format
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=const
+DefaultValue=0
+PDOMapping=0
+
 [1029]
 ParameterName=Error behavior
 ObjectType=0x8
@@ -291,7 +311,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
 AccessType=rw
-DefaultValue=
+DefaultValue=0
 PDOMapping=0
 
 [1029sub3]
@@ -300,7 +320,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
 AccessType=rw
-DefaultValue=
+DefaultValue=0
 PDOMapping=0
 
 [1029sub4]
@@ -309,7 +329,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
 AccessType=rw
-DefaultValue=
+DefaultValue=0
 PDOMapping=0
 
 [1200]
@@ -511,8 +531,25 @@ DefaultValue=0x00000004
 PDOMapping=0
 
 [ManufacturerObjects]
-SupportedObjects=1
+SupportedObjects=18
 1=0x2100
+2=0x2300
+3=0x230A
+4=0x2310
+5=0x2320
+6=0x2350
+7=0x2360
+8=0x2370
+9=0x2375
+10=0x237A
+11=0x23A0
+12=0x2400
+13=0x2401
+14=0x24FF
+15=0x2500
+16=0x2501
+17=0x2510
+18=0x25FF
 
 [2100]
 ParameterName=Error status bits
@@ -523,3 +560,719 @@ AccessType=ro
 DefaultValue=00000000000000000000
 PDOMapping=1
 
+[2300]
+ParameterName=Measurement time
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x3
+
+[2300sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=2
+PDOMapping=0
+
+[2300sub1]
+ParameterName=Pressure measure time
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0006
+AccessType=rw
+DefaultValue=20
+PDOMapping=0
+
+[2300sub2]
+ParameterName=Temperature measure time
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0006
+AccessType=rw
+DefaultValue=20
+PDOMapping=0
+
+[230A]
+ParameterName=Password
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x000A
+AccessType=rw
+DefaultValue=00000000000000000000
+PDOMapping=0
+
+[2310]
+ParameterName=Pressure units
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=rw
+HighLimit=6
+LowLimit=0
+DefaultValue=0
+PDOMapping=0
+
+[2320]
+ParameterName=Fixed-point control
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x3
+
+[2320sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=2
+PDOMapping=1
+
+[2320sub1]
+ParameterName=Pressure value point position
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0002
+AccessType=rw
+DefaultValue=3
+PDOMapping=1
+
+[2320sub2]
+ParameterName=Temperature value point position
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0002
+AccessType=rw
+DefaultValue=3
+PDOMapping=1
+
+[2350]
+ParameterName=Control flags
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2360]
+ParameterName=Out of safe working range flags
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2370]
+ParameterName=Pressure working range
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x4
+
+[2370sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=3
+PDOMapping=0
+
+[2370sub1]
+ParameterName=Minimum
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2370sub2]
+ParameterName=Maximum
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=1000
+PDOMapping=0
+
+[2370sub3]
+ParameterName=Absolute Maximum pressure
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=
+PDOMapping=0
+
+[2375]
+ParameterName=Temperature working range
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x5
+
+[2375sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=4
+PDOMapping=0
+
+[2375sub1]
+ParameterName=Minimum
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=-60
+PDOMapping=0
+
+[2375sub2]
+ParameterName=Maximum
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=85
+PDOMapping=0
+
+[2375sub3]
+ParameterName=Absolute Maximum temperataure
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=
+PDOMapping=0
+
+[2375sub4]
+ParameterName=Maximum CPU Temperature
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=
+PDOMapping=0
+
+[237A]
+ParameterName=Voltage working range
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x3
+
+[237Asub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=2
+PDOMapping=0
+
+[237Asub1]
+ParameterName=Minimum voltage
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=9
+PDOMapping=0
+
+[237Asub2]
+ParameterName=Maximum voltage
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=100
+PDOMapping=0
+
+[23A0]
+ParameterName=Modbus Settings
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x5
+
+[23A0sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=4
+PDOMapping=0
+
+[23A0sub1]
+ParameterName=Modbus Address
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=rw
+HighLimit=253
+LowLimit=1
+DefaultValue=4
+PDOMapping=0
+
+[23A0sub2]
+ParameterName=Serial baud rate
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=rw
+DefaultValue=57600
+PDOMapping=0
+
+[23A0sub3]
+ParameterName=Serial mode
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=rw
+HighLimit=6
+LowLimit=0
+DefaultValue=0
+PDOMapping=0
+
+[23A0sub4]
+ParameterName=Enabled
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0001
+AccessType=rw
+DefaultValue=1
+PDOMapping=0
+
+[2400]
+ParameterName=Pressure conversion coefficients
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x13
+
+[2400sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=18
+PDOMapping=0
+
+[2400sub1]
+ParameterName=Coefficient A0
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub2]
+ParameterName=Coefficient A1
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub3]
+ParameterName=Coefficient A2
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub4]
+ParameterName=Coefficient A3
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=1
+PDOMapping=0
+
+[2400sub5]
+ParameterName=Coefficient A4
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub6]
+ParameterName=Coefficient A5
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub7]
+ParameterName=Coefficient A6
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub8]
+ParameterName=Coefficient A7
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub9]
+ParameterName=Coefficient A8
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400subA]
+ParameterName=Coefficient A9
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400subB]
+ParameterName=Coefficient A10
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400subC]
+ParameterName=Coefficient A11
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400subD]
+ParameterName=Coefficient A12
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400subE]
+ParameterName=Coefficient A13
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400subF]
+ParameterName=Coefficient A14
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub10]
+ParameterName=Coefficient A15
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub11]
+ParameterName=Coefficient Ft0
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2400sub12]
+ParameterName=Coefficient Fp0
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2401]
+ParameterName=Temperature conversion coefficients
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x6
+
+[2401sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=5
+PDOMapping=0
+
+[2401sub1]
+ParameterName=Coefficient T0
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2401sub2]
+ParameterName=Coefficient C1
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=1
+PDOMapping=0
+
+[2401sub3]
+ParameterName=Coefficient C2
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2401sub4]
+ParameterName=Coefficient C3
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2401sub5]
+ParameterName=Coefficient F0
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[24FF]
+ParameterName=Reference Frequency
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[2500]
+ParameterName=Output values Float-formatted
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x3
+
+[2500sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=2
+PDOMapping=1
+
+[2500sub1]
+ParameterName=Pressure
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2500sub2]
+ParameterName=Temperature
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2501]
+ParameterName=Output values Integer-formatted
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x3
+
+[2501sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=2
+PDOMapping=1
+
+[2501sub1]
+ParameterName=Pressure
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0004
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2501sub2]
+ParameterName=Temperature
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0009
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2510]
+ParameterName=Internal values
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x5
+
+[2510sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=4
+PDOMapping=0
+
+[2510sub1]
+ParameterName=Pressure frequency
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2510sub2]
+ParameterName=Temperature frequency
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2510sub3]
+ParameterName=CPU temperature
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[2510sub4]
+ParameterName=Power source voltage
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=ro
+DefaultValue=
+PDOMapping=1
+
+[25FF]
+ParameterName=Debuging values
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x7
+
+[25FFsub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=6
+PDOMapping=0
+
+[25FFsub1]
+ParameterName=PChanelTarget
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[25FFsub2]
+ParameterName=PChanelResult
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[25FFsub3]
+ParameterName=TChanelTarget
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[25FFsub4]
+ParameterName=TChanelResult
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[25FFsub5]
+ParameterName=CPU temperature RAW value
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[25FFsub6]
+ParameterName=Power source voltage RAW value
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=ro
+DefaultValue=
+PDOMapping=0

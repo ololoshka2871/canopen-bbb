@@ -50,17 +50,30 @@ class TestSDOReadAll(object):
 
         # lss prepare node
         lss_waiting_state(cls.network)
-        lss_set_node_id(cls.network, cls.node_id)
+        lss_configure_node(cls.network, cls.node_id, 125000)
         cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         cls.node.associate_network(cls.network)
+        cls.node.nmt.state = 'RESET COMMUNICATION'
+        cls.network.disconnect()
+
+        set_interface_bitrate(125000)
+        cls.network = create_network()
+        cls.node.associate_network(cls.network)
+        cls.node.nmt.state = 'OPERATIONAL'
 
     @classmethod
     def teardown_class(cls):
+        cls.node.nmt.state = 'PRE-OPERATIONAL'
+        lss_configure_node(cls.network, cls.node_id, 10000)
+        cls.node.nmt.state = 'RESET COMMUNICATION'
         cls.network.disconnect()
+
+        set_interface_bitrate(10000)
 
     def test_read_SDO_entries(self, odEntry):
         entry = ODEntry.parce(odEntry)
-        if isinstance(self.node.sdo[entry.index], canopen.sdo.base.Array):
+        if isinstance(self.node.sdo[entry.index], canopen.sdo.base.Array) or \
+                isinstance(self.node.sdo[entry.index], canopen.sdo.base.Record):
             for subindex in self.node.sdo[entry.index].keys():
                 try:
                     v = self.node.sdo[entry.index][subindex].raw
