@@ -124,10 +124,13 @@ def set_interface_bitrate(bitrate, interface=default_interface):
     commad_down = 'sudo ip link set {} down'.format(interface)
     commad_up = 'sudo ip link set {} up type can bitrate {} loopback off'.format(interface, bitrate)
 
+    time.sleep(0.5)
     if _execute_command(commad_down) > 0:
         raise Exception("Interface Down exception")
+    time.sleep(0.5)
     if _execute_command(commad_up) > 0:
         raise Exception("Interface UP exception")
+    time.sleep(1)
 
 
 def _execute_command(command):
