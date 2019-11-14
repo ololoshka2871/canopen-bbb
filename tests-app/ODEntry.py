@@ -27,3 +27,9 @@ class ODEntry:
             return sdo[self.index].raw
         else:
             return sdo[self.index][self.subindex].raw
+
+    def setvalue(self, sdo, v):
+        if self.subindex is None:
+            sdo[self.index].raw = v
+        else:
+            sdo[self.index][self.subindex].raw = v
