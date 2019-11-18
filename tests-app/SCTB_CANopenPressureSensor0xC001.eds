@@ -1762,7 +1762,7 @@ ParameterName=Reference Frequency
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0007
-AccessType=ro
+AccessType=rw
 DefaultValue=
 PDOMapping=0
 

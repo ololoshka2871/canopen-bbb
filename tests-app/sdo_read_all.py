@@ -3,7 +3,7 @@
 from common import *
 from ODEntry import *
 import canopen
-import time
+
 
 def pytest_generate_tests(metafunc):
     node = canopen.RemoteNode(1, 'SCTB_CANopenPressureSensor0xC001.eds')
@@ -49,21 +49,25 @@ class TestSDOReadAll(object):
         entry = ODEntry.parce(odEntry)
         if isinstance(self.node.sdo[entry.index], canopen.sdo.base.Array) or \
                 isinstance(self.node.sdo[entry.index], canopen.sdo.base.Record):
-            for subindex in self.node.sdo[entry.index].keys():
-                try:
-                    v = self.node.sdo[entry.index][subindex].raw
-                except canopen.sdo.exceptions.SdoAbortedError as f:
-                    if entry.index == 0x1003 and subindex > 0 and f.code == 0x08000023:
-                        continue  # лог ошибок может быть пуст
+            if entry.subindex is None:
+                return
 
-                    if entry.index == 0x1800 and subindex == 4 and f.code == 0x06090011:
-                        continue  # это так и должно быть, этого сабиндекса нет
+            try:
+                print('trying to read {}sub{}'.format(hex(entry.index), entry.subindex))
+                v = entry.getvalue(self.node.sdo)
+            except canopen.sdo.exceptions.SdoAbortedError as f:
+                if entry.index == 0x1003 and entry.subindex > 0 and f.code == 0x08000023:
+                    return  # лог ошибок может быть пуст
 
-                    if entry.index == 0x1029 and subindex == 3 and f.code == 0x06090011:
-                        continue  # это так и должно быть, этого сабиндекса нет
+                if (entry.index in (6144, 6145, 6146, 6147, 6148)) \
+                        and entry.subindex == 4 and f.code == 0x06090011:
+                    return  # это так и должно быть, этого сабиндекса нет
 
-                    elif f.code != 0x06010001:
-                        raise f
+                if entry.index == 0x1029 and entry.subindex == 3 and f.code == 0x06090011:
+                    return  # это так и должно быть, этого сабиндекса нет
+
+                elif f.code != 0x06010001:
+                    raise f
         else:
             try:
                 v = entry.getvalue(self.node.sdo)
