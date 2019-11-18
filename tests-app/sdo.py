@@ -7,6 +7,7 @@ import pytest
 import random
 import string
 import math
+import time
 
 
 def random_float():
@@ -252,3 +253,92 @@ class TestSDO(object):
         entry.setvalue(self.node.sdo, testvalue)
         assert is_floats_equal(testvalue, entry.getvalue(self.node.sdo))
         entry.setvalue(self.node.sdo, currentValue)  # restore
+
+    def test_settings_save(self):
+        # список ячеек и того, что будем записывать
+        celllist = (
+            '2400sub1',
+            '2400sub2',
+            '2400sub3',
+            '2400sub4',
+            '2400sub5',
+            '2400sub6',
+            '2400sub7',
+            '2400sub8',
+            '2400sub9',
+            '2400subA',
+            '2400subB',
+            '2400subC',
+            '2400subD',
+            '2400subE',
+            '2400subF',
+            '2400sub10',
+            '2400sub11',
+            '2400sub12',
+            '2401sub1',
+            '2401sub2',
+            '2401sub3',
+            '2401sub4',
+            '2401sub5',
+
+            '24FF',
+            '2370sub1',
+            '2370sub2',
+            '2370sub3',
+            '2375sub1',
+            '2375sub2',
+            '2375sub3',
+            '2375sub4',
+            '237Asub1',
+            '237Asub2',
+            '23A0sub1',
+            '23A0sub2',
+            '23A0sub3',
+            '23A0sub4')
+        testvals = ((random_float(),) * 23 + (9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True))
+
+        # верный пароль
+        self.node.sdo[0x230A].raw = self.correct_password
+
+        # чтение старых значений
+        oldvalues = [None] * len(testvals)
+        for i in range(len(celllist)):
+            entry = ODEntry.parce(celllist[i])
+            oldvalues[i] = entry.getvalue(self.node.sdo)
+
+        # запись
+        for i in range(len(celllist)):
+            entry = ODEntry.parce(celllist[i])
+            entry.setvalue(self.node.sdo, testvals[i])
+
+        # сохранение
+        self.node.store()
+
+        # ребут
+        self.node.nmt.state = 'RESET'
+        time.sleep(1)
+        lss_set_node_id(self.network, self.node_id)
+
+        # проверка
+        for i in range(len(celllist)):
+            entry = ODEntry.parce(celllist[i])
+            v = entry.getvalue(self.node.sdo)
+            if type(v) is float:
+                assert is_floats_equal(v, testvals[i])
+            else:
+                assert v == testvals[i]
+
+        # Для восстановления также нужен пароль
+        self.node.sdo[0x230A].raw = self.correct_password
+
+        # восстановление оригинальных значений
+        for i in range(len(celllist)):
+            entry = ODEntry.parce(celllist[i])
+            entry.setvalue(self.node.sdo, oldvalues[i])
+
+        # запись
+        self.node.store()
+
+        # ребут
+        self.node.nmt.state = 'RESET'
+        time.sleep(1)
