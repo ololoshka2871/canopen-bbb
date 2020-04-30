@@ -73,5 +73,5 @@ Product Code = 0x{:X}
 Revision Number = {}
 Serial Number = {}'''.format(*LSS_id))
     else:
-        print('Fast scan failled.')
+        print('Fast scan failed.')
     nw.disconnect()

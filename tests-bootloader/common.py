@@ -14,6 +14,7 @@ boot_serial_number = 1
 
 default_interface = 'can0'
 
+default_bitrate = 50000
 
 speed_map = {
     10000: 8,
@@ -25,6 +26,8 @@ speed_map = {
     800000: 1,
     1000000: 0,
 }
+
+default_bitrate_grate = speed_map[default_bitrate]
 
 headed_size = 9 * 4
 

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import canopen
-from canopen_lss_fastscan import fast_scan
 from common import *
 import time
 
@@ -10,7 +8,7 @@ import time
 class TestLSS(object):
     @classmethod
     def setup_class(cls):
-        set_interface_bitrate(10000)
+        set_interface_bitrate(default_bitrate)
         cls.network = create_network()
         cls.network.nmt.state = 'RESET'
         time.sleep(0.1)
@@ -40,7 +38,8 @@ class TestLSS(object):
         (4, True),
         (6, True),
         (7, True),
-        (8, True)
+        (8, True),
+        (default_bitrate_grate, True) # restore to default
     ])
     def test_configure_bit_timing(self, speed_grade, result):
         lss_configuration_state(self.network)

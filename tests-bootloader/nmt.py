@@ -81,7 +81,7 @@ class TestNMT(object):
         lss_waiting_state(self.network)
         self.network.nmt.state = 'PRE-OPERATIONAL'
 
-    @pytest.mark.parametrize("test_speed", [125000, 50000, 20000, 10000])
+    @pytest.mark.parametrize("test_speed", [125000, 50000, 20000, 10000, default_bitrate])
     def test_switch_speed_reset(self, test_speed):
         if not self.network.bus:
             self.network = create_network()
@@ -100,7 +100,7 @@ class TestNMT(object):
         self.network.nmt.state = 'RESET'
         self.network.disconnect()
         time.sleep(0.1)
-        set_interface_bitrate(10000)
+        set_interface_bitrate(default_bitrate)
         self.network = create_network()
         lss_set_node_id(self.network, self.node_id)
         self.node.associate_network(self.network)
@@ -116,7 +116,8 @@ class TestNMT(object):
                               (125000, True),
                               (50000, True),
                               (20000, True),
-                              (10000, True)
+                              (10000, True),
+                              (default_bitrate, True)
                               ])
     def test_switch_speed_operational(self, bitrate, result):
         if self.network.bus:

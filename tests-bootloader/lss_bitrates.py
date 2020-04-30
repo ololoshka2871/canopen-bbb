@@ -9,7 +9,7 @@ import time
 class TestLSSBitrates(object):
     @classmethod
     def setup_class(cls):
-        set_interface_bitrate(10000)
+        set_interface_bitrate(default_bitrate)
         nw = create_network()
         nw.nmt.state = 'RESET'
         nw.disconnect()
@@ -34,7 +34,9 @@ class TestLSSBitrates(object):
          (125000, True),
          (50000, True),
          (20000, True),
-         (10000, True)])
+         (10000, True),
+         (default_bitrate, True)
+         ])
     def testBitrate(self, bitrate, result):
         network = create_network()
         lss_waiting_state(network)

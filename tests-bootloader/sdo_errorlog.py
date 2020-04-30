@@ -8,7 +8,7 @@ import pytest
 class TestSDOErrorLogRelated(object):
     @classmethod
     def setup_class(cls):
-        test_speed = 10000
+        test_speed = default_bitrate
         cls.node_id = 16
         cls.network = create_network()
         reset_network(cls.network)
@@ -31,7 +31,7 @@ class TestSDOErrorLogRelated(object):
         # lss prepare node
         reset_network(cls.network)
         cls.network.disconnect()
-        set_interface_bitrate(10000)
+        set_interface_bitrate(default_bitrate)
 
     # Проверка чтения поличества ошибок (может быть любое число 0-255)
     def test_read_error_log_depth(self):
