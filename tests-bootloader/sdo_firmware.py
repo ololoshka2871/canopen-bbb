@@ -8,7 +8,7 @@ import time
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA224
 
-# Установлено, что на скорости 10000 буфер передатчика собаки не более 182 байт
+# Установлено, что на собаке скорости 10000 буфер передатчика собаки не более 182 байт
 
 
 def align(v, alignnment):
@@ -43,11 +43,17 @@ class TestSDOFirmwareRelated(object):
 
     @classmethod
     def setup_class(cls):
-        with open('app.deploy', 'rb') as f:
-            cls.firmware = f.read()
+        try:
+            with open('app.deploy', 'rb') as f:
+                cls.firmware = f.read()
+        except:
+            with open('app.bin', 'rb') as f:
+                cls.firmware = f.read()
 
         test_speed = 125000
         cls.node_id = 16
+
+        set_interface_bitrate(default_bitrate)
         cls.network = create_network()
         reset_network(cls.network)
 
@@ -63,13 +69,14 @@ class TestSDOFirmwareRelated(object):
 
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
+        cls.node.nmt.wait_for_bootup()
 
     @classmethod
     def teardown_class(cls):
         # lss prepare node
         reset_network(cls.network)
         cls.network.disconnect()
-        set_interface_bitrate(10000)
+        set_interface_bitrate(default_bitrate)
 
     # Попытка чтения текущегго приложения должна завершиться ошибкой - доступ - только запись
     def test_read_firmware(self):
