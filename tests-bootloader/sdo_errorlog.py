@@ -25,7 +25,7 @@ class TestSDOErrorLogRelated(object):
 
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
-        cls.node.nmt.wait_for_bootup()
+        time.sleep(0.5)
 
     @classmethod
     def teardown_class(cls):
