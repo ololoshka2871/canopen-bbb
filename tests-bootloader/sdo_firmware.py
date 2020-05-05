@@ -2,10 +2,10 @@
 
 from common import *
 import can
+from canopen.nmt import NmtError
 import pytest
 import struct
 import time
-from Crypto.Cipher import AES
 from Crypto.Hash import SHA224
 
 # Установлено, что на собаке скорости 10000 буфер передатчика собаки не более 182 байт
@@ -44,11 +44,16 @@ class TestSDOFirmwareRelated(object):
     @classmethod
     def setup_class(cls):
         try:
-            with open('app.deploy', 'rb') as f:
-                cls.firmware = f.read()
-        except:
             with open('app.bin', 'rb') as f:
-                cls.firmware = f.read()
+                cls.raw_firmware = f.read()
+        except:
+            cls.raw_firmware = None
+
+        try:
+            with open('app.deploy', 'rb') as f:
+                cls.encrypted_firmware = f.read()
+        except:
+            cls.encrypted_firmware = None
 
         test_speed = 125000
         cls.node_id = 16
@@ -71,7 +76,7 @@ class TestSDOFirmwareRelated(object):
         cls.node.associate_network(cls.network)
         try:
             cls.node.nmt.wait_for_bootup(0.5)
-        except canopen.Network.nmt.NmtError:
+        except NmtError:
             pass
 
     @classmethod
@@ -87,6 +92,24 @@ class TestSDOFirmwareRelated(object):
             len(self.node.sdo[0x1f50][1].raw)
 
         assert str(e_info.value) == 'Code 0x06010001, Attempt to read a write only object'
+
+    @pytest.mark.parametrize('method,result', [
+        (0, True),
+        (1, True),
+        (2, False),
+        (-1, False)
+    ])
+    def test_select_encryption_method(self, method, result):
+        if result:
+            self.node.sdo[0x1f55][1].raw = method
+            assert self.node.sdo[0x1f55][1].raw == method
+        else:
+            with pytest.raises(Exception) as e_info:
+                self.node.sdo[0x1f55][1].raw = method
+            if method < 0:
+                assert str(e_info.value) == 'Value does not fit in specified type'
+            else:
+                assert str(e_info.value) == 'Code 0x06090031, Value of parameter written too high'
 
     # Записываем в область приложения нули блочным способом или нет, если ошибка
     def test_restore_after_invalid_write(self):
@@ -120,15 +143,35 @@ class TestSDOFirmwareRelated(object):
                                     'dictionary is present'
 
     # Записываем корректный образ приложения
-    def test_write_correct_app(self):
-        data = self.firmware
-        with self.node.sdo[0x1f50][1].open('wb', size=len(data), block_transfer=False) as f:
-            f.write(data)
-        assert Error_CODE(self.node.sdo[0x1003][1].raw).code == Error_CODES.APPLICATION_READY_TO_START
+    def common_write_correct_app(self, fm, method):
+        if not fm:
+            return
+
+        self.node.sdo[0x1f55][1].raw = method
+
+        with self.node.sdo[0x1f50][1].open('wb', size=len(fm), block_transfer=False) as f:
+            f.write(fm)
+        if Error_CODE(self.node.sdo[0x1003][1].raw).code != Error_CODES.APPLICATION_READY_TO_START:
+            raise RuntimeError('Write failed')
+
+    def test_write_correct_raw_app(self):
+        self.common_write_correct_app(self.raw_firmware, 0)
+
+    def test_write_correct_encrypted_app(self):
+        self.common_write_correct_app(self.encrypted_firmware, 1)
+
+    def get_crc(self):
+        fm = self.raw_firmware if self.raw_firmware else self.encrypted_firmware
+        return struct.unpack('<I', fm[6 * 4:7 * 4])[0]
 
     # Сравниваем указанный в образе CRC32 образа приложения с тем, что вернет нам бутлоадер насчитавций фактическое
     # значение
     def test_correct_app_crc(self):
-        crc = struct.unpack('<I', self.firmware[6*4:7*4])[0]
         r_crc = self.node.sdo[0x1f56][1].raw
-        assert crc == r_crc
+        assert self.get_crc() == r_crc
+
+    def test_write_incorrect_method(self):
+        if self.raw_firmware and self.encrypted_firmware:
+            with pytest.raises(RuntimeError) as e_info:
+                self.common_write_correct_app(self.encrypted_firmware, 0)
+            assert str(e_info.value) == 'Write failed'

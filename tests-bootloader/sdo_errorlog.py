@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from common import *
-import can
+from canopen.nmt import NmtError
 import pytest
 
 
@@ -27,7 +27,7 @@ class TestSDOErrorLogRelated(object):
         cls.node.associate_network(cls.network)
         try:
             cls.node.nmt.wait_for_bootup(0.5)
-        except canopen.Network.nmt.NmtError:
+        except NmtError:
             pass
 
     @classmethod

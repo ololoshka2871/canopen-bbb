@@ -139,8 +139,8 @@ SupportedObjects=11
 7=0x1200
 8=0x1F50
 9=0x1F51
-10=0x1F56
-11=0x1F57
+10=0x1F55
+11=0x1F56
 
 [1003]
 ParameterName=Pre-defined error field
@@ -162,7 +162,7 @@ ParameterName=Standard error field
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0007
-AccessType=ro
+AccessType=rw
 DefaultValue=0
 PDOMapping=0
 
@@ -327,6 +327,30 @@ ObjectType=0x7
 DataType=0x0005
 AccessType=wo
 DefaultValue=
+PDOMapping=0
+
+[1F55]
+ParameterName=Application image encription method
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x2
+
+[1F55sub0]
+ParameterName=Number of entries
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=1
+PDOMapping=0
+
+[1F55sub1]
+ParameterName=Application 1 encription method
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0007
+AccessType=rw
+DefaultValue=0
 PDOMapping=0
 
 [1F56]
