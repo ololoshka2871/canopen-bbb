@@ -69,7 +69,10 @@ class TestSDOFirmwareRelated(object):
 
         cls.node = canopen.RemoteNode(cls.node_id, 'Bootloader.eds')
         cls.node.associate_network(cls.network)
-        time.sleep(0.5)
+        try:
+            cls.node.nmt.wait_for_bootup(0.5)
+        except canopen.Network.nmt.NmtError:
+            pass
 
     @classmethod
     def teardown_class(cls):
