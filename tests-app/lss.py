@@ -10,7 +10,7 @@ import time
 class TestLSS(object):
     @classmethod
     def setup_class(cls):
-        set_interface_bitrate(10000)
+        # set_interface_bitrate(default_bitrate)
         cls.network = create_network()
         time.sleep(0.1)
 
@@ -34,7 +34,8 @@ class TestLSS(object):
         (4, True),
         (6, True),
         (7, True),
-        (8, True)
+        (8, True),
+        (default_bitrate_grate, True)  # restore to default
     ])
     def test_configure_bit_timing(self, speed_grade, result):
         lss_configuration_state(self.network)
@@ -60,12 +61,14 @@ class TestLSS(object):
 
         lss_waiting_state(self.network)
 
-    def test_set_node_id(self):
+    @pytest.mark.parametrize('node_id', [
+        1, 15, 127, 255
+    ])
+    def test_set_node_id_ch(self, node_id):
         lss_configuration_state(self.network)
 
-        for node_id in (1, 15, 127, 255):
-            self.network.lss.configure_node_id(node_id)
-            assert node_id == self.network.lss.inquire_node_id()
+        self.network.lss.configure_node_id(node_id)
+        assert node_id == self.network.lss.inquire_node_id()
 
         lss_waiting_state(self.network)
 
@@ -102,11 +105,11 @@ class TestLSS(object):
         node.associate_network(self.network)
         node.nmt.state = 'RESET COMMUNICATION'
 
-        time.sleep(0.1)
+        node.nmt.wait_for_bootup(0.1)
 
         lss_configuration_state(self.network)
-        id = self.network.lss.inquire_node_id()
-        assert id == node_id
+        previd = self.network.lss.inquire_node_id()
+        assert previd == node_id
         new_node_id = node_id + 1
         self.network.lss.configure_node_id(new_node_id)
         assert new_node_id == self.network.lss.inquire_node_id()

@@ -4,6 +4,7 @@ from common import *
 import time
 import pytest
 import canopen
+from start_app import node_id as start_node_id
 
 
 #  OPERATIONAL
@@ -35,13 +36,26 @@ class TestNMT(object):
     def _reset_delay(self):
         time.sleep(0.5)
 
-    def test_reset_com(self):
+    # работает только сразу после старта приложения, когда NodeID еще стартовый
+    def test_reset_comm_brdcast(self):
+        node = canopen.RemoteNode(start_node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
+        node.associate_network(self.network)
+        self.network.nmt.state = 'RESET COMMUNICATION'
+        node.nmt.wait_for_bootup(0.1)
+
+    def test_reset_brdcast(self):
+        node = canopen.RemoteNode(start_node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
+        node.associate_network(self.network)
+        self.network.nmt.state = 'RESET'
+        # waiting for node id assignment
+
+    def test_reset_comm_target(self):
         lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET COMMUNICATION'
         self.node.nmt.wait_for_bootup(1)
         assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
-    def test_reset(self):
+    def test_reset_all(self):  # <--- todo
         lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET'
         self._reset_delay()
@@ -89,7 +103,7 @@ class TestNMT(object):
         lss_waiting_state(self.network)
         self.network.nmt.state = 'PRE-OPERATIONAL'
 
-    @pytest.mark.parametrize("test_speed", [125000, 50000, 20000, 10000])
+    @pytest.mark.parametrize("test_speed", [125000, 50000, 20000, 10000, default_bitrate])
     def test_switch_speed_reset(self, test_speed):
         if not self.network.bus:
             self.network = create_network()
@@ -116,13 +130,13 @@ class TestNMT(object):
         self.network.disconnect()
         self._reset_delay()
         # restore default bitrate
-        set_interface_bitrate(10000)
+        set_interface_bitrate(default_bitrate)
         self.network = create_network()
 
         # set application node id
         lss_set_node_id(self.network, self.node_id)
         # delay for can finish booting
-        time.sleep(1)
+        time.sleep(0.5)
 
         self.node.associate_network(self.network)
         # check if app online
@@ -137,7 +151,8 @@ class TestNMT(object):
                               (125000, True),
                               (50000, True),
                               (20000, True),
-                              (10000, True)
+                              (10000, True),
+                              (default_bitrate, True)
                               ])
     def test_switch_speed_operational(self, bitrate, result):
         if self.network.bus:
