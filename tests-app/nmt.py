@@ -41,7 +41,6 @@ class TestNMT(object):
         node = canopen.RemoteNode(start_node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         node.associate_network(self.network)
         self.network.nmt.state = 'RESET COMMUNICATION'
-        node.nmt.wait_for_bootup(0.1)
 
     def test_reset_brdcast(self):
         node = canopen.RemoteNode(start_node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
@@ -51,11 +50,12 @@ class TestNMT(object):
 
     def test_reset_comm_target(self):
         lss_set_node_id(self.network, self.node_id)
+        self.node.nmt.wait_for_bootup(1)
         self.network.nmt.state = 'RESET COMMUNICATION'
         self.node.nmt.wait_for_bootup(1)
         assert self.node.nmt.state == 'PRE-OPERATIONAL'
 
-    def test_reset_all(self):  # <--- todo
+    def test_reset_all(self):
         lss_set_node_id(self.network, self.node_id)
         self.network.nmt.state = 'RESET'
         self._reset_delay()
@@ -98,7 +98,7 @@ class TestNMT(object):
 
         with pytest.raises(canopen.lss.LssError) as e_info:
             self.network.lss.configure_bit_timing(8)
-        assert str(e_info.value) == 'LSS Error: 1'
+        assert str(e_info.value) == 'No LSS response received'
 
         lss_waiting_state(self.network)
         self.network.nmt.state = 'PRE-OPERATIONAL'
@@ -109,8 +109,7 @@ class TestNMT(object):
             self.network = create_network()
 
         # set new speed
-        lss_configure_bit_timing(self.network, test_speed)
-        lss_set_node_id(self.network, self.node_id)
+        lss_configure_node(self.network, self.node_id, test_speed)
         # apply and restart communication
         self.network.nmt.state = 'RESET COMMUNICATION'
 
@@ -122,6 +121,8 @@ class TestNMT(object):
         self.network = create_network()
         self.node.associate_network(self.network)
 
+        self._reset_delay()
+
         # check device online
         assert self.node.sdo[0x1200][0].raw is not None
 
@@ -132,13 +133,13 @@ class TestNMT(object):
         # restore default bitrate
         set_interface_bitrate(default_bitrate)
         self.network = create_network()
+        self.node.associate_network(self.network)
 
         # set application node id
         lss_set_node_id(self.network, self.node_id)
         # delay for can finish booting
-        time.sleep(0.5)
+        self.node.nmt.wait_for_bootup(0.5)
 
-        self.node.associate_network(self.network)
         # check if app online
         assert self.node.sdo[0x1200][0].raw is not None
         self.network.disconnect()
@@ -170,6 +171,8 @@ class TestNMT(object):
         self.network.disconnect()
         if result:
             set_interface_bitrate(bitrate)
+
+        self._reset_delay()
 
         self.network = create_network()
         self.node.associate_network(self.network)

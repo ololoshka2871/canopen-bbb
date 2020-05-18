@@ -68,6 +68,8 @@ class TestLSS(object):
         lss_configuration_state(self.network)
 
         self.network.lss.configure_node_id(node_id)
+        self.network.lss.store_configuration()
+        time.sleep(0.1)
         assert node_id == self.network.lss.inquire_node_id()
 
         lss_waiting_state(self.network)
@@ -77,6 +79,7 @@ class TestLSS(object):
 
         node_id = 15
         self.network.lss.configure_node_id(node_id)
+        self.network.lss.store_configuration()
         assert node_id == self.network.lss.inquire_node_id()
         self.network.lss.store_configuration()
         lss_waiting_state(self.network)
@@ -97,20 +100,21 @@ class TestLSS(object):
 
         node_id = 15
         self.network.lss.configure_node_id(node_id)
-        assert node_id == self.network.lss.inquire_node_id()
         self.network.lss.store_configuration()
+        assert node_id == self.network.lss.inquire_node_id()
         lss_waiting_state(self.network)
 
         node = canopen.RemoteNode(node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         node.associate_network(self.network)
         node.nmt.state = 'RESET COMMUNICATION'
 
-        node.nmt.wait_for_bootup(0.1)
+        time.sleep(0.1)
 
         lss_configuration_state(self.network)
         previd = self.network.lss.inquire_node_id()
         assert previd == node_id
         new_node_id = node_id + 1
         self.network.lss.configure_node_id(new_node_id)
+        self.network.lss.store_configuration()
         assert new_node_id == self.network.lss.inquire_node_id()
         lss_waiting_state(self.network)

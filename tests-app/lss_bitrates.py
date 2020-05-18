@@ -9,7 +9,7 @@ import time
 class TestLSSBitrates(object):
     @classmethod
     def setup_class(cls):
-        set_interface_bitrate(default_bitrate)
+        #set_interface_bitrate(default_bitrate)
         time.sleep(0.1)
 
     @staticmethod
@@ -17,8 +17,8 @@ class TestLSSBitrates(object):
         grade = speed_map[bitrate]
         try:
             network.lss.configure_bit_timing(grade)
-            network.lss.store_configuration()
             network.lss.activate_bit_timing(100)
+            network.lss.store_configuration()
             return True
         except canopen.lss.LssError:
             return False
@@ -43,3 +43,5 @@ class TestLSSBitrates(object):
 
         if result:
             set_interface_bitrate(bitrate)
+        else:
+            time.sleep(1)

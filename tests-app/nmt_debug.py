@@ -38,9 +38,27 @@ class TestNMT(object):
     def _reset_delay(self):
         time.sleep(0.5)
 
-    def test_reset_all(self):  # <--- todo
+    def test_reset_all(self):
         self.network.nmt.state = 'RESET'
         self._reset_delay()
         lss_set_node_id(self.network, self.node_id)
         self.node.nmt.wait_for_bootup(1)
         assert self.node.nmt.state == 'PRE-OPERATIONAL'
+
+    def test_new_speed_reset_comm(self):
+        test_speed = 50000
+
+        # set new speed
+        lss_configure_node(self.network, self.node_id, test_speed)
+        # apply and restart communication
+        self.network.nmt.state = 'RESET COMMUNICATION'
+
+        # apply host speed
+        self.network.disconnect()
+        set_interface_bitrate(test_speed)
+
+        # reconnect
+        self.network = create_network()
+        self.node.associate_network(self.network)
+
+        assert self.node.sdo[0x1200][0].raw is not None
