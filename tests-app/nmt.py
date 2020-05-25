@@ -87,7 +87,7 @@ class TestNMT(object):
 
     def test_disable_LSS_in_operation_mode(self):
         self.network.nmt.state = 'RESET COMMUNICATION'
-        self._reset_delay()
+        self.node.nmt.wait_for_bootup(1)
         self.network.nmt.state = 'OPERATIONAL'
         lss_configuration_state(self.network)
 
