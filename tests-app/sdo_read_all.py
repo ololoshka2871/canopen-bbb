@@ -16,34 +16,51 @@ def pytest_generate_tests(metafunc):
 class TestSDOReadAll(object):
     @classmethod
     def setup_class(cls):
-        set_interface_bitrate(10000)
-        cls.network = create_network()
-        cls.node_id = 16
-        reset_network(cls.network)
+        cls.testspeed = 125000
 
-        # lss prepare node
-        lss_waiting_state(cls.network)
-        lss_configure_node(cls.network, cls.node_id, 125000)
-        cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
-        cls.node.associate_network(cls.network)
-        cls.node.nmt.state = 'RESET COMMUNICATION'
-        cls.node.remove_network()
-        cls.network.disconnect()
+        if cls.testspeed != default_bitrate:
+            set_interface_bitrate(default_bitrate)
+            cls.network = create_network()
+            cls.node_id = 16
+            reset_network(cls.network)
 
-        set_interface_bitrate(125000)
-        cls.network = create_network()
-        cls.node.associate_network(cls.network)
-        cls.node.nmt.state = 'OPERATIONAL'
+            # lss prepare node
+            lss_waiting_state(cls.network)
+            lss_configure_node(cls.network, cls.node_id, cls.testspeed)
+            cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
+            cls.node.associate_network(cls.network)
+            cls.node.nmt.state = 'RESET COMMUNICATION'
+            cls.node.remove_network()
+            cls.network.disconnect()
+
+            set_interface_bitrate(cls.testspeed)
+
+            cls.network = create_network()
+            cls.node.associate_network(cls.network)
+            time.sleep(0.5)
+        else:
+            cls.network = create_network()
+            cls.node_id = 16
+            reset_network(cls.network)
+
+            # lss prepare node
+            lss_configure_node(cls.network, cls.node_id, cls.testspeed)
+            time.sleep(0.5)
+            cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
+            cls.node.associate_network(cls.network)
+            cls.node.nmt.state = 'RESET COMMUNICATION'
+            cls.node.nmt.wait_for_bootup(1)
 
     @classmethod
     def teardown_class(cls):
-        cls.node.nmt.state = 'PRE-OPERATIONAL'
-        lss_configure_node(cls.network, cls.node_id, 10000)
-        cls.node.nmt.state = 'RESET COMMUNICATION'
-        cls.node.remove_network()
-        cls.network.disconnect()
+        if cls.testspeed != default_bitrate:
+            cls.node.nmt.state = 'PRE-OPERATIONAL'
+            lss_configure_node(cls.network, cls.node_id, default_bitrate)
+            cls.node.nmt.state = 'RESET COMMUNICATION'
+            cls.node.remove_network()
+            cls.network.disconnect()
 
-        set_interface_bitrate(10000)
+            set_interface_bitrate(default_bitrate)
 
     def test_read_SDO_entries(self, odEntry):
         entry = ODEntry.parce(odEntry)

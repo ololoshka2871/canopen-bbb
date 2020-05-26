@@ -23,19 +23,19 @@ class TestSDO(object):
     def setup_class(cls):
         cls.network = create_network()
         cls.node_id = 19
-        cls.correct_password = '_PASSWORD_'
+        cls.correct_password = b'_PASSWORD_'
         reset_network(cls.network)
+        time.sleep(0.5)
 
         # lss prepare node
         lss_waiting_state(cls.network)
-        lss_set_node_id(cls.network, cls.node_id)
         cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         cls.node.associate_network(cls.network)
-        cls.node.nmt.state = 'OPERATIONAL'
+        lss_set_node_id(cls.network, cls.node_id)
+        cls.node.nmt.wait_for_bootup(1)
 
     @classmethod
     def teardown_class(cls):
-        cls.node.nmt.state = 'PRE-OPERATIONAL'
         cls.node.remove_network()
         cls.network.disconnect()
 
@@ -51,34 +51,38 @@ class TestSDO(object):
                               '100a',
                               '1014',
                               '1022',
-                              '1200sub1',
-                              '1200sub2',
                               '2100',
                               '2360',
                               '2500sub1',
                               '2500sub2',
+                              '2500sub3',
                               '2501sub1',
                               '2501sub2',
+                              '2501sub3',
                               '2510sub1',
                               '2510sub2',
                               '2510sub3',
                               '2510sub4',
+                              '2510sub5',
                               '25FFsub1',
                               '25FFsub2',
                               '25FFsub3',
                               '25FFsub4',
                               '25FFsub5',
-                              '25FFsub6'])
+                              '25FFsub6',
+                              '25FFsub7',
+                              '25FFsub8'])
     def test_ro_entries(self, ro_entry):
         """
         Все по честному, либа действительно пытается записать в эти индексы,
         и должна получить верный код ошибки
         """
         entry = ODEntry.parce(ro_entry)
-        assert entry.getvalue(self.node.sdo) is not None
+        v = entry.getvalue(self.node.sdo)
+        assert v is not None
 
         with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as excinfo:
-            entry.setvalue(self.node.sdo, entry.getvalue(self.node.sdo))
+            entry.setvalue(self.node.sdo, v)
 
         assert excinfo.value.code == 0x06010002  # readonly
 
@@ -86,7 +90,7 @@ class TestSDO(object):
     def randomString(stringLength=10):
         """Generate a random string of fixed length """
         letters = string.ascii_lowercase
-        return ''.join(random.choice(letters) for i in range(stringLength))
+        return b''.join(random.choice(letters).encode() for i in range(stringLength))
 
     @pytest.mark.parametrize("e,testvalue", [
         ('1005', 129),
@@ -174,11 +178,11 @@ class TestSDO(object):
         ('1F80', 0),
         ('2300sub1', 100),
         ('2300sub2', 100),
-        ('230A', '0123456789'),
+        ('230A', b'0123456789'),
         ('2310', 1),
         ('2320sub1', 2),
         ('2320sub2', -1),
-        ('2350', 3),
+        ('2350', 0xf),
     ])
     def test_wr_entries(self, e, testvalue):
         entry = ODEntry.parce(e)
@@ -214,6 +218,12 @@ class TestSDO(object):
         ('2401sub3', random_float()),
         ('2401sub4', random_float()),
         ('2401sub5', random_float()),
+
+        ('2402sub1', random_float()),
+        ('2402sub2', random_float()),
+        ('2402sub3', random_float()),
+        ('2402sub4', random_float()),
+        ('2402sub5', random_float()),
 
         ('24FF', 10000001),
 
@@ -275,11 +285,18 @@ class TestSDO(object):
             '2400sub10',
             '2400sub11',
             '2400sub12',
+
             '2401sub1',
             '2401sub2',
             '2401sub3',
             '2401sub4',
             '2401sub5',
+
+            '2402sub1',
+            '2402sub2',
+            '2402sub3',
+            '2402sub4',
+            '2402sub5',
 
             '24FF',
             '2370sub1',
@@ -295,7 +312,8 @@ class TestSDO(object):
             '23A0sub2',
             '23A0sub3',
             '23A0sub4')
-        testvals = ((random_float(),) * 23 + (9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True))
+        testvals = [random_float() for i in range(28)] + \
+                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True]
 
         # верный пароль
         self.node.sdo[0x230A].raw = self.correct_password
@@ -318,6 +336,7 @@ class TestSDO(object):
         self.node.nmt.state = 'RESET'
         time.sleep(1)
         lss_set_node_id(self.network, self.node_id)
+        self.node.nmt.wait_for_bootup(1)
 
         # проверка
         for i in range(len(celllist)):
