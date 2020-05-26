@@ -7,6 +7,9 @@ import canopen
 import time
 
 
+test_node_id = 42
+
+
 def create_hb_cb(node):
     def hb_cb(arg):
         print('HB from {} -> State: {}'.format(node.id, canopen.nmt.NMT_STATES[arg]))
@@ -15,8 +18,13 @@ def create_hb_cb(node):
 
 def main():
     network = create_network()
-    node = canopen.RemoteNode(42, 'SCTB_CANopenPressureSensor0xC001.eds')
+    node = canopen.RemoteNode(test_node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
     node.associate_network(network)
+
+    reset_network(network)
+    lss_set_node_id(network, test_node_id)
+    node.nmt.wait_for_bootup(1)
+
     node.nmt.add_hearbeat_callback(create_hb_cb(node))
 
     print('Ready to capture Heartbeat messages, Press CTRL+C to exit')

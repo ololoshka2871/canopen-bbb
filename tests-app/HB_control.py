@@ -1,5 +1,6 @@
 from common import *
 import pytest
+import canopen
 import time
 
 
@@ -10,10 +11,14 @@ class TestHBControl(object):
         cls.node_id = 16
         reset_network(cls.network)
 
-        # lss prepare node
-        lss_set_node_id(cls.network, cls.node_id)
+        time.sleep(0.5)
+
         cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         cls.node.associate_network(cls.network)
+
+        # lss prepare node
+        lss_set_node_id(cls.network, cls.node_id)
+        cls.node.nmt.wait_for_bootup(1)
 
     @classmethod
     def teardown_class(cls):
