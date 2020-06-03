@@ -2,6 +2,7 @@
 
 from common import *
 from ODEntry import *
+import datetime
 import canopen
 import pytest
 import random
@@ -18,11 +19,15 @@ def is_floats_equal(f1, f2, max_diff=1e-6):
     return math.fabs(f1 - f2) < max_diff
 
 
+def current_year():
+    return datetime.datetime.now().year
+
+
 class TestSDO(object):
     @classmethod
     def setup_class(cls):
         cls.network = create_network()
-        cls.node_id = 19
+        cls.node_id = 42
         cls.correct_password = b'_PASSWORD_'
         reset_network(cls.network)
         time.sleep(0.5)
@@ -49,7 +54,6 @@ class TestSDO(object):
                               '1008',
                               '1009',
                               '100a',
-                              '1014',
                               '1022',
                               '2100',
                               '2360',
@@ -71,7 +75,8 @@ class TestSDO(object):
                               '25FFsub5',
                               '25FFsub6',
                               '25FFsub7',
-                              '25FFsub8'])
+                              '25FFsub8',
+                              '6001sub1'])
     def test_ro_entries(self, ro_entry):
         """
         Все по честному, либа действительно пытается записать в эти индексы,
@@ -85,6 +90,95 @@ class TestSDO(object):
             entry.setvalue(self.node.sdo, v)
 
         assert excinfo.value.code == 0x06010002  # readonly
+
+    def _test_defaults_common(self):
+        test_items = (
+            ('1000', 0x301BB),
+
+            # resetable values
+            ('1005', 0x80),
+            ('1006', 0),
+            ('1007', 0),
+            ('1014', self.node_id + 0x80),
+            ('1015', 100),
+            ('1017', 1000),
+            ('1029sub1', 1),
+            ('1029sub2', 0),
+            ('1029sub4', 0),
+            ('1029sub5', 0),
+            ('1029sub6', 0),
+            ('1200sub1', self.node_id + 0x600),
+            ('1200sub2', self.node_id + 0x580),
+            ('1F80', 4),
+            ('2300sub1', 1000),
+            ('2300sub2', 1000),
+            ('2310', 4),
+            ('2320sub1', 3),
+            ('2320sub2', 3),
+            ('2350', (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | (1 << 0)),
+
+            # TPDO 1
+            ('1800sub1', 0x180 + self.node_id),
+            ('1800sub2', 0xFE),
+            ('1800sub3', 2000),
+            ('1800sub5', 1000),
+            ('1800sub6', 0),
+            ('1a00sub0', 1),
+            ('1a00sub1', 0x61000120),
+
+            # TPDO 2
+            ('1801sub1', 0x280 + self.node_id),
+            ('1801sub2', 0xFE),
+            ('1801sub3', 2000),
+            ('1801sub5', 1000),
+            ('1801sub6', 0),
+            ('1a01sub0', 1),
+            ('1a01sub1', 0x61010120),
+
+            # TPDO 3
+            ('1802sub1', (0x380 + self.node_id) | (1 << 31)),
+            ('1802sub2', 0xFE),
+            ('1802sub3', 0),
+            ('1802sub5', 0),
+            ('1802sub6', 0),
+            ('1a02sub0', 0),
+            ('1a02sub1', 0),
+            ('1a02sub2', 0),
+            ('1a02sub3', 0),
+            ('1a02sub4', 0),
+            ('1a02sub5', 0),
+            ('1a02sub6', 0),
+            ('1a02sub7', 0),
+            ('1a02sub8', 0),
+
+
+            # TPDO 4
+            ('1803sub1', (0x480 + self.node_id) | (1 << 31)),
+            ('1803sub2', 0xFE),
+            ('1803sub3', 0),
+            ('1803sub5', 0),
+            ('1803sub6', 0),
+            ('1a03sub0', 0),
+            ('1a03sub1', 0),
+            ('1a03sub2', 0),
+            ('1a03sub3', 0),
+            ('1a03sub4', 0),
+            ('1a03sub5', 0),
+            ('1a03sub6', 0),
+            ('1a03sub7', 0),
+            ('1a03sub8', 0),
+
+            ('6001sub1', 1)
+        )
+
+        for element in test_items:
+            entry = ODEntry.parce(element[0])
+            v = entry.getvalue(self.node.sdo)
+            print('Test item: {}'.format(entry))
+            assert v == element[1]
+
+    def test_default_values(self):
+        self._test_defaults_common()
 
     @staticmethod
     def randomString(stringLength=10):
@@ -105,33 +199,17 @@ class TestSDO(object):
         ('1029sub5', 0),
         ('1029sub6', 0),
 
-        # TPDO 1
-        ('1800sub2', 1),
-        ('1800sub3', 10),
-        ('1800sub5', 100),
-        ('1800sub6', 2),
-        ('1a00sub1', 0x25000120),
-        ('1a00sub2', 0x25000120),
-        ('1a00sub3', 0),
-        ('1a00sub4', 0),
-        ('1a00sub5', 0),
-        ('1a00sub6', 0),
-        ('1a00sub7', 0),
-        ('1a00sub8', 0),
+        # TPDO 1 disabled. Can't change values while enabled
+        # ('1800sub2', 1),
+        # ('1800sub3', 10),
+        # ('1800sub5', 100),
+        # ('1800sub6', 2),
 
-        # TPDO 2
-        ('1801sub2', 1),
-        ('1801sub3', 10),
-        ('1801sub5', 100),
-        ('1801sub6', 2),
-        ('1a01sub1', 0x25000120),
-        ('1a01sub2', 0x25000120),
-        ('1a01sub3', 0),
-        ('1a01sub4', 0),
-        ('1a01sub5', 0),
-        ('1a01sub6', 0),
-        ('1a01sub7', 0),
-        ('1a01sub8', 0),
+        # TPDO 2 disabled. Can't change values while enabled
+        # ('1801sub2', 1),
+        # ('1801sub3', 10),
+        # ('1801sub5', 100),
+        # ('1801sub6', 2),
 
         # TPDO 3
         ('1802sub2', 1),
@@ -161,21 +239,10 @@ class TestSDO(object):
         ('1a03sub7', 0),
         ('1a03sub8', 0),
 
-        # TPDO 5
-        ('1804sub2', 1),
-        ('1804sub3', 10),
-        ('1804sub5', 100),
-        ('1804sub6', 2),
-        ('1a04sub1', 0x25000120),
-        ('1a04sub2', 0x25000120),
-        ('1a04sub3', 0),
-        ('1a04sub4', 0),
-        ('1a04sub5', 0),
-        ('1a04sub6', 0),
-        ('1a04sub7', 0),
-        ('1a04sub8', 0),
-
         ('1F80', 0),
+        ('2005sub1', 2020),
+        ('2005sub2', 10),
+        ('2005sub3', 13),
         ('2300sub1', 100),
         ('2300sub2', 100),
         ('230A', b'0123456789'),
@@ -267,6 +334,10 @@ class TestSDO(object):
     def test_settings_save(self):
         # список ячеек и того, что будем записывать
         celllist = (
+            # '2005sub1',
+            '2005sub2',
+            '2005sub3',
+
             '2400sub1',
             '2400sub2',
             '2400sub3',
@@ -312,7 +383,9 @@ class TestSDO(object):
             '23A0sub2',
             '23A0sub3',
             '23A0sub4')
-        testvals = [random_float() for i in range(28)] + \
+        testvals = [  # 2021,
+                    4, 6] + \
+                   [random_float() for i in range(28)] + \
                    [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True]
 
         # верный пароль
@@ -361,3 +434,115 @@ class TestSDO(object):
         # ребут
         self.node.nmt.state = 'RESET'
         time.sleep(1)
+        lss_set_node_id(self.network, self.node_id);
+        self.node.nmt.wait_for_bootup(1)
+
+    @pytest.mark.parametrize("subindex,value", [
+        (1, 1970),
+        (1, 0),
+        (1, current_year() - 1),
+        (1, 2100),
+        (2, 0),
+        (2, 13),
+        (3, 0),
+        (2, 32),
+    ])
+    def test_incorrect_calibrationDate(self, subindex, value):
+        with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as excinfo:
+            self.node.sdo[0x2005][subindex].raw = value
+
+        assert (excinfo.value.code == 0x6090031 or excinfo.value.code == 0x6090032)
+
+    def test_reset_defaults(self):
+        def disable_tpdo(index):
+            entry = ODEntry.parce(index)
+            return index, entry.getvalue(self.node.sdo) | (1 << 31)
+
+        test_items = (
+            # resetable values
+            ('1005', 0x81),
+            ('1006', 10),
+            ('1007', 29),
+            ('1014', self.node_id + 0x83),
+            ('1015', 123),
+            ('1017', 1234),
+            ('1029sub1', 0),
+            ('1029sub2', 0),
+            ('1029sub4', 1),
+            ('1029sub5', 1),
+            ('1029sub6', 1),
+            ('1200sub1', self.node_id + 0x601),
+            ('1200sub2', self.node_id + 0x581),
+            ('1F80', 0),
+            ('2300sub1', 128),
+            ('2300sub2', 256),
+            ('2310', 0),
+            ('2320sub1', 0),
+            ('2320sub2', 1),
+            ('2350', 0),
+
+            # Суть в том, что чтобы изменить TPDO нужно сначало отключить его (|= 1 << 31)
+            # TPDO 1
+            disable_tpdo('1800sub1'),
+            ('1800sub1', 0x183 | (1 << 31)),
+            ('1800sub2', 0x30),
+            ('1800sub3', 1289),
+            ('1800sub5', 555),
+            ('1800sub6', 23),
+
+            # TPDO 2
+            disable_tpdo('1801sub1'),
+            ('1801sub1', 0x286 | (1 << 31)),
+            ('1801sub2', 0xFF),
+            ('1801sub3', 512),
+            ('1801sub5', 1024),
+            ('1801sub6', 37),
+
+            # TPDO 3
+            disable_tpdo('1802sub1'),
+            ('1802sub1', 0x386 | (1 << 31)),
+            ('1802sub2', 0x78),
+            ('1802sub3', 123),
+            ('1802sub5', 321),
+            ('1802sub6', 8),
+            ('1a02sub0', 1),
+            ('1a02sub1', 0x23200108),
+            ('1a02sub2', 0),
+            ('1a02sub3', 0),
+            ('1a02sub4', 0),
+            ('1a02sub5', 0),
+            ('1a02sub6', 0),
+            ('1a02sub7', 0),
+            ('1a02sub8', 0),
+
+            # TPDO 4
+            disable_tpdo('1803sub1'),
+            ('1803sub1', 0x481 | (1 << 31)),
+            ('1803sub2', 0xF0),
+            ('1803sub3', 321),
+            ('1803sub5', 5),
+            ('1803sub6', 7),
+            ('1a03sub0', 2),
+            ('1a03sub1', 0x25000120),
+            ('1a03sub2', 0x25000220),
+            ('1a03sub3', 0),
+            ('1a03sub4', 0),
+            ('1a03sub5', 0),
+            ('1a03sub6', 0),
+            ('1a03sub7', 0),
+            ('1a03sub8', 0),
+        )
+
+        for element in test_items:
+            entry = ODEntry.parce(element[0])
+            print('Writing: {}'.format(entry))
+            entry.setvalue(self.node.sdo, element[1])
+
+        self.node.sdo[0x1011][1].raw = 1  # reset
+        self.node.store()
+
+        self.node.nmt.state = 'RESET COMMUNICATION'
+        self.node.nmt.wait_for_bootup(1)
+
+        self._test_defaults_common()
+

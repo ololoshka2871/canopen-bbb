@@ -8,6 +8,7 @@ import argparse
 import canopen
 import time
 import datetime
+import sys
 
 first_result = True
 
@@ -44,7 +45,7 @@ def print_result(msg):
     now = datetime.datetime.now()
     nowfmt = now.strftime('%Y-%m-%dT%H:%M:%S') + ('-%02d' % (now.microsecond / 10000))
 
-    print('{};{}'.format(nowfmt, ';'.join(map(str,results))))
+    print('{};{}'.format(nowfmt, ';'.join(map(str, results))))
 
 
 def tpdo_cb(msg):
@@ -79,14 +80,17 @@ def do_reading(node, sync_period):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Can Open manual TPDO reader')
+    parser = argparse.ArgumentParser(description='Can Open manual TPDO reader', epilog='''
+Example:\n
+\t{} --nodeid 16 --eds myeds.eds --tpdo 1 2501sub1
+'''.format(sys.argv[0]))
     parser.add_argument('-N', '--nodeid', required=True, type=int, help='Node ID to connect to')
     parser.add_argument('--eds', required=True, type=str, help='Device electronic datasheet')
     parser.add_argument('-T', '--tpdo', required=True, type=int, help='TPDO number to use')
     parser.add_argument('-t', '--transtype', default=254, type=int, help="TPDO transmission type")
     parser.add_argument('--event_timer', type=int, default=100, help="TPO event timer value, ms")
     parser.add_argument('-S', '--sync', type=float, default=0, help='SYNC period')
-    parser.add_argument('index', type=str, nargs='+', help='Indexes of mapped objects')
+    parser.add_argument('index', type=str, nargs='+', help='Indexes of mapped objects (1234sub1)')
     args = parser.parse_args()
 
     node = prepare_node(args.nodeid, args.eds)

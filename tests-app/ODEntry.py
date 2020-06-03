@@ -1,5 +1,5 @@
 import canopen
-
+import ast
 
 class ODEntry:
     def __init__(self, index, subindex=None):
@@ -28,8 +28,13 @@ class ODEntry:
         else:
             return sdo[self.index][self.subindex].raw
 
-    def setvalue(self, sdo, v):
+    def setvalue(self, sdo, val):
+        def int_parser(x, _t):
+            return ast.literal_eval(str(x)) if _t is int else x
+
         if self.subindex is None:
-            sdo[self.index].raw = v
+            t = type(sdo[self.index].raw)
+            sdo[self.index].raw = t(int_parser(val, t))
         else:
-            sdo[self.index][self.subindex].raw = v
+            t = type(sdo[self.index][self.subindex].raw)
+            sdo[self.index][self.subindex].raw = t(int_parser(val, t))

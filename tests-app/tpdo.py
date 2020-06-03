@@ -15,10 +15,11 @@ class TestSDO(object):
         reset_network(cls.network)
 
         # lss prepare node
-        lss_waiting_state(cls.network)
-        lss_set_node_id(cls.network, cls.node_id)
         cls.node = canopen.RemoteNode(cls.node_id, 'SCTB_CANopenPressureSensor0xC001.eds')
         cls.node.associate_network(cls.network)
+        lss_waiting_state(cls.network)
+        lss_set_node_id(cls.network, cls.node_id)
+        cls.node.nmt.wait_for_bootup(0.5)
 
     @classmethod
     def teardown_class(cls):
