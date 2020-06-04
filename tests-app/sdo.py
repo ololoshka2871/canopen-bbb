@@ -574,7 +574,7 @@ class TestSDO(object):
     @pytest.mark.parametrize("chanel", (0, 1))
     @pytest.mark.parametrize("value", (-100, -3.5, 1.3, 100, 0))
     def test_zero_correction(self, chanel, value):
-        mapping = (('2450sub1', '2500sub1'), ('2450sub1', '2500sub1'))
+        mapping = (('2450sub1', '2500sub1'), ('2450sub2', '2500sub2'))
 
         correction_index = ODEntry.parce(mapping[chanel][0])
         result_index = ODEntry.parce(mapping[chanel][1])
