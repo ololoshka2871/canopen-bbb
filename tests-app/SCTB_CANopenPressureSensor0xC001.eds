@@ -1301,7 +1301,7 @@ DefaultValue=-18
 PDOMapping=1
 
 [ManufacturerObjects]
-SupportedObjects=20
+SupportedObjects=21
 1=0x2005
 2=0x2100
 3=0x2300
@@ -1317,11 +1317,12 @@ SupportedObjects=20
 13=0x2400
 14=0x2401
 15=0x2402
-16=0x24FF
-17=0x2500
-18=0x2501
-19=0x2510
-20=0x25FF
+16=0x2450
+17=0x24FF
+18=0x2500
+19=0x2501
+20=0x2510
+21=0x25FF
 
 [2005]
 ParameterName=Last Calibration Date
@@ -1956,6 +1957,30 @@ AccessType=rw
 DefaultValue=
 PDOMapping=0
 
+[2450]
+ParameterName=Delta A0 Pressure Conversion Coefficient
+ObjectType=0x8
+;StorageLocation=RAM
+SubNumber=0x2
+
+[2450sub0]
+ParameterName=max sub-index
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=1
+PDOMapping=0
+
+[2450sub1]
+ParameterName=delta0
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
 [24FF]
 ParameterName=Reference Frequency
 ObjectType=0x7
@@ -2195,5 +2220,4 @@ DataType=0x0007
 AccessType=ro
 DefaultValue=
 PDOMapping=0
-
 

@@ -109,13 +109,6 @@ class TestSDO(object):
             ('1029sub6', 0),
             ('1200sub1', self.node_id + 0x600),
             ('1200sub2', self.node_id + 0x580),
-            ('1F80', 4),
-            ('2300sub1', 1000),
-            ('2300sub2', 1000),
-            ('2310', 4),
-            ('2320sub1', 3),
-            ('2320sub2', 3),
-            ('2350', (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | (1 << 0)),
 
             # TPDO 1
             ('1800sub1', 0x180 + self.node_id),
@@ -168,6 +161,17 @@ class TestSDO(object):
             ('1a03sub7', 0),
             ('1a03sub8', 0),
 
+            ('1F80', 4),
+            ('2300sub1', 1000),
+            ('2300sub2', 1000),
+            ('2310', 4),
+            ('2320sub1', 3),
+            ('2320sub2', 3),
+            ('2350', (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | (1 << 0)),
+
+            ('2450sub1', 0),
+            ('2450sub1', 0),
+
             ('6001sub1', 1)
         )
 
@@ -190,6 +194,7 @@ class TestSDO(object):
         ('1005', 129),
         ('1006', 1001),
         ('1007', 100),
+        ('1014', 0x183),
         ('1015', 10),
         ('1017', 1500),
         ('1019', 2),
@@ -250,6 +255,8 @@ class TestSDO(object):
         ('2320sub1', 2),
         ('2320sub2', -1),
         ('2350', 0xf),
+        ('2450sub1', 10),
+        ('2450sub2', -42),
     ])
     def test_wr_entries(self, e, testvalue):
         entry = ODEntry.parce(e)
@@ -257,7 +264,11 @@ class TestSDO(object):
         currentValue = entry.getvalue(self.node.sdo)
         assert currentValue is not None
         entry.setvalue(self.node.sdo, testvalue)
-        assert testvalue == entry.getvalue(self.node.sdo)
+        if entry.index == 0x1014:
+            assert testvalue + self.node_id == entry.getvalue(self.node.sdo)
+        else:
+            assert testvalue == entry.getvalue(self.node.sdo)
+
         entry.setvalue(self.node.sdo, currentValue)
 
     @pytest.mark.parametrize("e,testvalue", [
@@ -334,6 +345,9 @@ class TestSDO(object):
     def test_settings_save(self):
         # список ячеек и того, что будем записывать
         celllist = (
+            '1014',
+            '1015',
+
             # '2005sub1',
             '2005sub2',
             '2005sub3',
@@ -382,11 +396,16 @@ class TestSDO(object):
             '23A0sub1',
             '23A0sub2',
             '23A0sub3',
-            '23A0sub4')
-        testvals = [  # 2021,
+            '23A0sub4',
+
+            '2450sub1',
+            '2450sub2',
+        )
+        testvals = [0x325, 10] + \
+                   [  # 2021,
                     4, 6] + \
                    [random_float() for i in range(28)] + \
-                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True]
+                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True, 0.1, -3.84]
 
         # верный пароль
         self.node.sdo[0x230A].raw = self.correct_password
@@ -415,10 +434,13 @@ class TestSDO(object):
         for i in range(len(celllist)):
             entry = ODEntry.parce(celllist[i])
             v = entry.getvalue(self.node.sdo)
-            if type(v) is float:
-                assert is_floats_equal(v, testvals[i])
+            if entry.index == 0x1014:
+                assert testvals[i] + self.node_id == v
             else:
-                assert v == testvals[i]
+                if type(v) is float:
+                    assert is_floats_equal(v, testvals[i])
+                else:
+                    assert v == testvals[i]
 
         # Для восстановления также нужен пароль
         self.node.sdo[0x230A].raw = self.correct_password
@@ -473,13 +495,6 @@ class TestSDO(object):
             ('1029sub6', 1),
             ('1200sub1', self.node_id + 0x601),
             ('1200sub2', self.node_id + 0x581),
-            ('1F80', 0),
-            ('2300sub1', 128),
-            ('2300sub2', 256),
-            ('2310', 0),
-            ('2320sub1', 0),
-            ('2320sub2', 1),
-            ('2350', 0),
 
             # Суть в том, что чтобы изменить TPDO нужно сначало отключить его (|= 1 << 31)
             # TPDO 1
@@ -531,6 +546,16 @@ class TestSDO(object):
             ('1a03sub6', 0),
             ('1a03sub7', 0),
             ('1a03sub8', 0),
+
+            ('1F80', 0),
+            ('2300sub1', 128),
+            ('2300sub2', 256),
+            ('2310', 0),
+            ('2320sub1', 0),
+            ('2320sub2', 1),
+            ('2350', 0),
+            ('2450sub1', -0.53),
+            ('2450sub2', -7.81),
         )
 
         for element in test_items:
@@ -546,3 +571,21 @@ class TestSDO(object):
 
         self._test_defaults_common()
 
+    @pytest.mark.parametrize("chanel", (0, 1))
+    @pytest.mark.parametrize("value", (-100, -3.5, 1.3, 100, 0))
+    def test_zero_correction(self, chanel, value):
+        mapping = (('2450sub1', '2500sub1'), ('2450sub1', '2500sub1'))
+
+        correction_index = ODEntry.parce(mapping[chanel][0])
+        result_index = ODEntry.parce(mapping[chanel][1])
+
+        measure_time = int(self.node.sdo[0x2300][chanel + 1].raw * 1.1 / 1000)
+
+        correction_index.setvalue(self.node.sdo, 0)
+        time.sleep(measure_time)
+        base_value = result_index.getvalue(self.node.sdo)
+        correction_index.setvalue(self.node.sdo, value)
+        time.sleep(measure_time)
+        corrected_value = result_index.getvalue(self.node.sdo)
+
+        assert math.fabs(base_value + value - corrected_value) < 1
