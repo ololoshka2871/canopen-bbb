@@ -164,7 +164,7 @@ class TestSDO(object):
             ('1F80', 4),
             ('2300sub1', 1000),
             ('2300sub2', 1000),
-            ('2310', 4),
+            ('2310', 0x004E0000),
             ('2320sub1', 3),
             ('2320sub2', 3),
             ('2350', (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | (1 << 0)),
@@ -251,7 +251,7 @@ class TestSDO(object):
         ('2300sub1', 100),
         ('2300sub2', 100),
         ('230A', b'0123456789'),
-        ('2310', 1),
+        ('2310', 0x00A40000),
         ('2320sub1', 2),
         ('2320sub2', -1),
         ('2350', 0xf),
@@ -400,12 +400,15 @@ class TestSDO(object):
 
             '2450sub1',
             '2450sub2',
+
+            '2310',
         )
         testvals = [0x325, 10] + \
                    [  # 2021,
                     4, 6] + \
                    [random_float() for i in range(28)] + \
-                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True, 0.1, -3.84]
+                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True, 0.1, -3.84] + \
+                   [0x00AB0000]
 
         # верный пароль
         self.node.sdo[0x230A].raw = self.correct_password
@@ -550,7 +553,7 @@ class TestSDO(object):
             ('1F80', 0),
             ('2300sub1', 128),
             ('2300sub2', 256),
-            ('2310', 0),
+            ('2310', 0x00220000),
             ('2320sub1', 0),
             ('2320sub2', 1),
             ('2350', 0),
@@ -571,6 +574,21 @@ class TestSDO(object):
 
         self._test_defaults_common()
 
+    @pytest.mark.parametrize("code", [
+        0x00220000,  # Pa
+        0x004E0000,  # Bar
+        0x00A20000,  # mmH2O
+        0x00A30000,  # mmHG
+        0x00A40000,  # ATM
+        0x00AB0000,  # PSI
+        pytest.param(0, marks=pytest.mark.xfail),
+        pytest.param(1, marks=pytest.mark.xfail),
+        pytest.param(0xFFFFFFFF, marks=pytest.mark.xfail),
+        pytest.param(0x00220001, marks=pytest.mark.xfail),
+    ])
+    def test_measure_units(self, code):
+        self.node.sdo[0x2310].raw = code
+
     @pytest.mark.parametrize("chanel", (0, 1))
     @pytest.mark.parametrize("value", (-100, -3.5, 1.3, 100, 0))
     def test_zero_correction(self, chanel, value):
@@ -588,4 +606,4 @@ class TestSDO(object):
         time.sleep(measure_time)
         corrected_value = result_index.getvalue(self.node.sdo)
 
-        assert math.fabs(base_value + value - corrected_value) < 1
+        assert math.fabs(base_value + value - corrected_value) < 2

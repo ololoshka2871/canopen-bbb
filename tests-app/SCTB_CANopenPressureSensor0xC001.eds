@@ -8,8 +8,8 @@ Description=EDS for CANopenPresureSensor
 CreationTime=12:00AM
 CreationDate=05-24-2019
 CreatedBy=tolyan
-ModificationTime=12:00AM
-ModificationDate=06-24-2019
+ModificationTime=9:03AM
+ModificationDate=06-05-2020
 ModifiedBy=tolyan
 
 [DeviceInfo]
@@ -35,7 +35,7 @@ GroupMessaging=0
 NrOfRXPDO=0
 NrOfTXPDO=4
 LSS_Supported=1
-;LSS_Type=
+;LSS_Type=Server
 
 [DummyUsage]
 Dummy0001=0
@@ -1169,16 +1169,16 @@ ObjectType=0x7
 DataType=0x0005
 AccessType=ro
 DefaultValue=1
-PDOMapping=0
+PDOMapping=1
 
 [6001sub1]
 ParameterName=Hardware module 1
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0007
-AccessType=ro
+AccessType=rw
 DefaultValue=1
-PDOMapping=0
+PDOMapping=1
 
 [6100]
 ParameterName=General Pressures
@@ -1421,11 +1421,11 @@ PDOMapping=0
 ParameterName=Pressure units
 ObjectType=0x7
 ;StorageLocation=RAM
-DataType=0x0005
+DataType=0x0007
 AccessType=rw
-HighLimit=6
-LowLimit=0
-DefaultValue=4
+HighLimit=0x00AB0000
+LowLimit=0x00220000
+DefaultValue=0x004E0000
 PDOMapping=0
 
 [2320]
@@ -1958,10 +1958,10 @@ DefaultValue=
 PDOMapping=0
 
 [2450]
-ParameterName=Delta A0 Pressure Conversion Coefficient
+ParameterName=Zero Correction
 ObjectType=0x8
 ;StorageLocation=RAM
-SubNumber=0x2
+SubNumber=0x3
 
 [2450sub0]
 ParameterName=max sub-index
@@ -1969,11 +1969,20 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
 AccessType=ro
-DefaultValue=1
+DefaultValue=2
 PDOMapping=0
 
 [2450sub1]
-ParameterName=delta0
+ParameterName=delta0 Pressure
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2450sub2]
+ParameterName=delta0 temperature
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0008
