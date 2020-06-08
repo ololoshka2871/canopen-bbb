@@ -38,6 +38,7 @@ class TestSDO(object):
         cls.node.associate_network(cls.network)
         lss_set_node_id(cls.network, cls.node_id)
         cls.node.nmt.wait_for_bootup(1)
+        time.sleep(1)
 
     @classmethod
     def teardown_class(cls):
@@ -103,7 +104,7 @@ class TestSDO(object):
             ('1015', 100),
             ('1017', 1000),
             ('1029sub1', 1),
-            ('1029sub2', 0),
+            ('1029sub2', 1),
             ('1029sub4', 0),
             ('1029sub5', 0),
             ('1029sub6', 0),
@@ -577,6 +578,7 @@ class TestSDO(object):
     @pytest.mark.parametrize("code", [
         0x00220000,  # Pa
         0x004E0000,  # Bar
+        0x00A10000,  # AT
         0x00A20000,  # mmH2O
         0x00A30000,  # mmHG
         0x00A40000,  # ATM
@@ -588,6 +590,8 @@ class TestSDO(object):
     ])
     def test_measure_units(self, code):
         self.node.sdo[0x2310].raw = code
+
+        assert self.node.sdo[0x6100][2].raw == code  # check mapping
 
     @pytest.mark.parametrize("chanel", (0, 1))
     @pytest.mark.parametrize("value", (-100, -3.5, 1.3, 100, 0))
@@ -607,3 +611,25 @@ class TestSDO(object):
         corrected_value = result_index.getvalue(self.node.sdo)
 
         assert math.fabs(base_value + value - corrected_value) < 2
+
+    @pytest.mark.parametrize("index", (0x6100, 0x6101))
+    def test_user_limits(self, index):
+        valueEntry = ODEntry(index, 1)
+        flagsEntry = ODEntry(index, 3)
+
+        UpperLimitEntry = ODEntry(index, 4)
+        LowerLimitEntry = ODEntry(index, 5)
+
+        currentValue = valueEntry.getvalue(self.node.sdo)
+
+        UpperLimitEntry.setvalue(self.node.sdo, currentValue - 10)
+        assert flagsEntry.getvalue(self.node.sdo) == 1 << 1
+
+        UpperLimitEntry.setvalue(self.node.sdo, currentValue + 10)
+        assert flagsEntry.getvalue(self.node.sdo) & (1 << 1) == 0
+
+        LowerLimitEntry.setvalue(self.node.sdo, currentValue + 10)
+        assert flagsEntry.getvalue(self.node.sdo) == 1 << 2
+
+        LowerLimitEntry.setvalue(self.node.sdo, currentValue - 10)
+        assert flagsEntry.getvalue(self.node.sdo) & (1 << 2) == 0

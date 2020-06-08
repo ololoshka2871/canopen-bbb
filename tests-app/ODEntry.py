@@ -1,6 +1,7 @@
 import canopen
 import ast
 
+
 class ODEntry:
     def __init__(self, index, subindex=None):
         self.index = index
