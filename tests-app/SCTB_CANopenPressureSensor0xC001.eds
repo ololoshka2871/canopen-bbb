@@ -1228,7 +1228,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0008
 AccessType=rw
-DefaultValue=34.5
+DefaultValue=345
 PDOMapping=1
 
 [6100sub5]
@@ -1237,7 +1237,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0008
 AccessType=rw
-DefaultValue=0.2
+DefaultValue=2
 PDOMapping=1
 
 [6101]
@@ -1961,7 +1961,7 @@ PDOMapping=0
 ParameterName=Zero Correction
 ObjectType=0x8
 ;StorageLocation=RAM
-SubNumber=0x3
+SubNumber=0x4
 
 [2450sub0]
 ParameterName=max sub-index
@@ -1969,7 +1969,7 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0005
 AccessType=ro
-DefaultValue=2
+DefaultValue=3
 PDOMapping=0
 
 [2450sub1]
@@ -1982,7 +1982,16 @@ DefaultValue=0
 PDOMapping=0
 
 [2450sub2]
-ParameterName=delta0 temperature
+ParameterName=delta0 temperature1
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0008
+AccessType=rw
+DefaultValue=0
+PDOMapping=0
+
+[2450sub3]
+ParameterName=delta0 temperature2
 ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0008

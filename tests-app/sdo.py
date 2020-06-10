@@ -171,7 +171,8 @@ class TestSDO(object):
             ('2350', (1 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | (1 << 0)),
 
             ('2450sub1', 0),
-            ('2450sub1', 0),
+            ('2450sub2', 0),
+            ('2450sub3', 0),
 
             ('6001sub1', 1)
         )
@@ -258,6 +259,7 @@ class TestSDO(object):
         ('2350', 0xf),
         ('2450sub1', 10),
         ('2450sub2', -42),
+        ('2450sub3', 18),
     ])
     def test_wr_entries(self, e, testvalue):
         entry = ODEntry.parce(e)
@@ -401,6 +403,7 @@ class TestSDO(object):
 
             '2450sub1',
             '2450sub2',
+            '2450sub3',
 
             '2310',
         )
@@ -408,7 +411,7 @@ class TestSDO(object):
                    [  # 2021,
                     4, 6] + \
                    [random_float() for i in range(28)] + \
-                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True, 0.1, -3.84] + \
+                   [9999999, 3, 500, 600, -10, 70, 100, 103, 5, 75, 32, 9600, 3, True, 0.1, -3.84, 2.31] + \
                    [0x00AB0000]
 
         # верный пароль
@@ -560,6 +563,7 @@ class TestSDO(object):
             ('2350', 0),
             ('2450sub1', -0.53),
             ('2450sub2', -7.81),
+            ('2450sub3', 1.23),
         )
 
         for element in test_items:
@@ -568,40 +572,48 @@ class TestSDO(object):
             entry.setvalue(self.node.sdo, element[1])
 
         self.node.sdo[0x1011][1].raw = 1  # reset
-        self.node.store()
+        time.sleep(0.5)
 
         self.node.nmt.state = 'RESET COMMUNICATION'
         self.node.nmt.wait_for_bootup(1)
 
         self._test_defaults_common()
 
-    @pytest.mark.parametrize("code", [
-        0x00220000,  # Pa
-        0x004E0000,  # Bar
-        0x00A10000,  # AT
-        0x00A20000,  # mmH2O
-        0x00A30000,  # mmHG
-        0x00A40000,  # ATM
-        0x00AB0000,  # PSI
-        pytest.param(0, marks=pytest.mark.xfail),
-        pytest.param(1, marks=pytest.mark.xfail),
-        pytest.param(0xFFFFFFFF, marks=pytest.mark.xfail),
-        pytest.param(0x00220001, marks=pytest.mark.xfail),
+    @pytest.mark.parametrize("code,result", [
+        (0x00220000, True),  # Pa
+        (0x004E0000, True),  # Bar
+        (0x00A10000, True),  # AT
+        (0x00A20000, True),  # mmH2O
+        (0x00A30000, True),  # mmHG
+        (0x00A40000, True),  # ATM
+        (0x00AB0000, True),  # PSI
+        (0, False),
+        (1, False),
+        (0xFFFFFFFF, False),
+        (0x00220001, False),
     ])
-    def test_measure_units(self, code):
-        self.node.sdo[0x2310].raw = code
+    def test_measure_units(self, code, result):
+        if result:
+            self.node.sdo[0x2310].raw = code
+            assert self.node.sdo[0x6100][2].raw == code  # check mapping
+        else:
+            with pytest.raises(canopen.sdo.exceptions.SdoAbortedError) as excinfo:
+                self.node.sdo[0x2310].raw = code
 
-        assert self.node.sdo[0x6100][2].raw == code  # check mapping
+            assert excinfo.value.code == 0x06090030
 
-    @pytest.mark.parametrize("chanel", (0, 1))
+    @pytest.mark.parametrize("chanel", (0, 1, 2))
     @pytest.mark.parametrize("value", (-100, -3.5, 1.3, 100, 0))
     def test_zero_correction(self, chanel, value):
-        mapping = (('2450sub1', '2500sub1'), ('2450sub2', '2500sub2'))
+        mapping = (('2450sub1', '2500sub1'), ('2450sub2', '2500sub2'), ('2450sub3', '2500sub3'))
 
         correction_index = ODEntry.parce(mapping[chanel][0])
         result_index = ODEntry.parce(mapping[chanel][1])
 
-        measure_time = int(self.node.sdo[0x2300][chanel + 1].raw * 1.1 / 1000)
+        mt_subindex = chanel + 1
+        if mt_subindex > 2:
+            mt_subindex = 2
+        measure_time = int(self.node.sdo[0x2300][mt_subindex].raw * 1.1 / 1000)
 
         correction_index.setvalue(self.node.sdo, 0)
         time.sleep(measure_time)
