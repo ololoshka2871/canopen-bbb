@@ -80,17 +80,21 @@ def do_reading(node, sync_period):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Can Open manual TPDO reader', epilog='''
-Example:\n
-\t{} --nodeid 16 --eds myeds.eds --tpdo 1 2501sub1
+    parser = argparse.ArgumentParser(description='Can Open manual TPDO reader',
+                                     formatter_class=argparse.RawTextHelpFormatter,
+                                     epilog='''Example:
+\t{0} --nodeid 16 --eds myeds.eds --tpdo 1 2501sub1
+\t{0} --nodeid 16 --eds myeds.eds --tpdo 1 --noconfig
 '''.format(sys.argv[0]))
     parser.add_argument('-N', '--nodeid', required=True, type=int, help='Node ID to connect to')
     parser.add_argument('--eds', required=True, type=str, help='Device electronic datasheet')
     parser.add_argument('-T', '--tpdo', required=True, type=int, help='TPDO number to use')
+    parser.add_argument('-Y', '--noconfig', default=False, action="store_true",
+                        help="Skip configuration, allrady have correct, or readonly")
     parser.add_argument('-t', '--transtype', default=254, type=int, help="TPDO transmission type")
     parser.add_argument('--event_timer', type=int, default=100, help="TPO event timer value, ms")
     parser.add_argument('-S', '--sync', type=float, default=0, help='SYNC period')
-    parser.add_argument('index', type=str, nargs='+', help='Indexes of mapped objects (1234sub1)')
+    parser.add_argument('index', type=str, nargs='?', help='Indexes of mapped objects (1234sub1)')
     args = parser.parse_args()
 
     node = prepare_node(args.nodeid, args.eds)
@@ -99,21 +103,23 @@ Example:\n
 
     assert args.tpdo > 0
 
-    if 1 <= args.transtype <= 0xF0:
-        assert args.sync > 0
-
     node.tpdo.read()
     tpdo = node.tpdo[args.tpdo]
-    tpdo.clear()
+    if not args.noconfig:
+        if 1 <= args.transtype <= 0xF0:
+            assert args.sync > 0
 
-    for index in args.index:
-        add_tpo_variable(tpdo, index)
+        tpdo.clear()
 
-    tpdo.trans_type = args.transtype
-    tpdo.event_timer = args.event_timer
-    tpdo.enabled = True
+        for index in args.index:
+            add_tpo_variable(tpdo, index)
 
-    node.tpdo.save()
+        tpdo.trans_type = args.transtype
+        tpdo.event_timer = args.event_timer
+        tpdo.enabled = True
+
+        node.tpdo.save()
+
     tpdo.add_callback(tpdo_cb)
 
     do_reading(node, args.sync)

@@ -27,6 +27,12 @@ class TestSDO(object):
         cls.node.remove_network()
         cls.network.disconnect()
 
+    @staticmethod
+    def tpfo_cb(msg):
+        print('%s received' % msg.name)
+        for var in msg:
+            print('-> {} = {}'.format(var.name, var.raw))
+
     def test_clear_tpo_config(self):
         self.node.tpdo.read()
         for tpdoN in self.node.tpdo:
@@ -34,21 +40,28 @@ class TestSDO(object):
         self.node.tpdo.save()
 
     def test_simple_tpdo(self):
-        def tpfo_cb(msg):
-            print('%s received' % msg.name)
-            for var in msg:
-                print('-> {} = {}'.format(var.name, var.raw))
-
         self.node.tpdo.read()
-        tpdo = self.node.tpdo[1]
+        tpdo = self.node.tpdo[3]
         tpdo.add_variable(0x2500, 1)
         tpdo.add_variable(0x2500, 2)
         tpdo.trans_type = 254
         tpdo.event_timer = 1000
         tpdo.enabled = True
-        self.node.tpdo.save()
+        tpdo.save()
 
-        tpdo.add_callback(tpfo_cb)
+        tpdo.add_callback(TestSDO.tpfo_cb)
+        self.node.nmt.state = 'OPERATIONAL'
+        time.sleep(2)
+        self.node.nmt.state = 'PRE-OPERATIONAL'
+
+    @pytest.mark.parametrize("number", [1, 2])
+    def test_hardcoded_tpdo(self, number):
+        self.node.tpdo.read()
+        tpdo = self.node.tpdo[number]
+        tpdo.add_callback(TestSDO.tpfo_cb)
+
+        # can't use save(), manual enabling
+    
         self.node.nmt.state = 'OPERATIONAL'
         time.sleep(2)
         self.node.nmt.state = 'PRE-OPERATIONAL'
