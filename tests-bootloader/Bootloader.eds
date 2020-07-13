@@ -129,7 +129,7 @@ DefaultValue=1
 PDOMapping=0
 
 [OptionalObjects]
-SupportedObjects=11
+SupportedObjects=12
 1=0x1002
 2=0x1003
 3=0x1008
@@ -141,6 +141,7 @@ SupportedObjects=11
 9=0x1F51
 10=0x1F55
 11=0x1F56
+12=0x1F5A
 
 [1003]
 ParameterName=Pre-defined error field
@@ -352,6 +353,8 @@ DataType=0x0007
 AccessType=rw
 DefaultValue=0
 PDOMapping=0
+HighLimit=1
+LowLimit=0
 
 [1F56]
 ParameterName=Identifies the application
@@ -374,6 +377,30 @@ ObjectType=0x7
 ;StorageLocation=RAM
 DataType=0x0007
 AccessType=ro
+DefaultValue=
+PDOMapping=0
+
+[1F5A]
+ParameterName=Application settings data
+ObjectType=0x9
+;StorageLocation=RAM
+SubNumber=0x2
+
+[1F5Asub0]
+ParameterName=Number of entries
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x0005
+AccessType=ro
+DefaultValue=1
+PDOMapping=0
+
+[1F5Asub1]
+ParameterName=Application settings data 1
+ObjectType=0x7
+;StorageLocation=RAM
+DataType=0x000F
+AccessType=rw
 DefaultValue=
 PDOMapping=0
 
