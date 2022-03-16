@@ -37,5 +37,7 @@ class ODEntry:
             t = type(sdo[self.index].raw)
             sdo[self.index].raw = t(int_parser(val, t))
         else:
-            t = type(sdo[self.index][self.subindex].raw)
-            sdo[self.index][self.subindex].raw = t(int_parser(val, t))
+            #t = type(sdo[self.index][self.subindex].raw)
+            #sdo[self.index][self.subindex].raw = t(int_parser(val, t))
+            sdo[self.index][self.subindex].raw = int_parser(val, int)
+

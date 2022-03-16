@@ -63,7 +63,7 @@ if __name__ == '__main__':
     if int(sys.version[0]) == 2:
         res = fast_scan(nw.lss, False)
     else:
-        res = nw.lss.fast_scan()
+        res =
         nw.lss.send_switch_state_global(nw.lss.WAITING_STATE)
     if res[0]:
         LSS_id = res[1]
